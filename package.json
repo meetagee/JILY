@@ -20,9 +20,10 @@
   "homepage": "https://github.com/tunglam2101/cpen442-term-project#readme",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "debug": "^4.3.2",
     "express": "^4.17.1",
     "moment": "^2.29.1",
-    "mongodb": "^4.2.0"
+    "mongoose": "^6.0.13"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
