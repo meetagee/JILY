@@ -35,4 +35,35 @@ UserSchema.pre('save', async function(next){
 	next();
 });
 
+UserSchema.statics.login = async function(username, password, public_key) {
+	const user = await this.findOne({username});
+	if (user) {
+		const auth = await bcrypt.compare(password, user.password);
+		if (auth) {
+			return await this.findByIdAndUpdate(user._id, {$set: { 
+				"public_key": public_key
+				}}, function (err, user) {
+				if (err) throw Error('Public key error!');
+				console.log(user);
+				console.log(`User ${user._id} logged in!`);
+			});
+		}
+		throw Error('Incorrect password!');
+	}
+	throw Error('Incorrect username!');
+}
+
+UserSchema.statics.logout = async function(user_id) {
+	if (mongoose.Types.ObjectId.isValid(user_id)) {
+		return await this.findByIdAndUpdate(user_id, {$set: { 
+			"public_key": ""
+			}}, function (err, user) {
+			if (err) throw Error('Public key error!');
+			console.log(user);
+			console.log(`User ${user._id} logged out!`);
+		});
+	}
+	throw Error('Incorrect user_id!');
+}
+
 module.exports = mongoose.model("User", UserSchema);

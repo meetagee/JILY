@@ -4,12 +4,19 @@ Content-Type: application/json
 {
     "username": "yash",
     "password": "123456",
+    "public_key": "",
     "type": "Customer"
 }
 ###
 
 POST http://localhost:5000/user/login
+Content-Type: application/json
 
+{
+    "username": "yash",
+    "password": "123456",
+    "public_key": "777"
+}
 ###
 
-GET http://localhost:5000/user/logout
+GET http://localhost:5000/user/logout/
