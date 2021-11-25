@@ -13,10 +13,6 @@ const handleErrors = (err) => {
         errors.password = 'The password is incorrect!'
     }
 
-    if (err.message === 'Public key error!') {
-        errors.public_key = 'There was an internal error! please try again!'
-    }
-
     if (err.code === 11000) {
         errors.username = 'The username already exists!';
         return errors;
@@ -33,7 +29,7 @@ const handleErrors = (err) => {
 
 const maxAge = 3 * 24 * 60 * 60
 const createToken = (id) => {
-    return jwt.sign({id}, 'JILY', {
+    return jwt.sign({id}, process.env.JWT_SECRET, {
         expiresIn: maxAge
     });
 };
@@ -58,6 +54,7 @@ const login_post = async (req, res) => {
         const token = createToken(user._id);
         res.status(200).json({user: user._id, access_token: token});
     } catch (err) {
+        console.log(err)
         const errors = handleErrors(err);
         res.status(400).json({errors});
     }

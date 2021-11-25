@@ -15,8 +15,8 @@ Content-Type: application/json
 {
     "username": "yash",
     "password": "123456",
-    "public_key": "777"
+    "public_key": "7777"
 }
 ###
 
-GET http://localhost:5000/user/logout/
+GET http://localhost:5000/user/logout/619f417f99d4b918d6eec675

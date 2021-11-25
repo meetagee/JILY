@@ -42,11 +42,7 @@ UserSchema.statics.login = async function(username, password, public_key) {
 		if (auth) {
 			return await this.findByIdAndUpdate(user._id, {$set: { 
 				"public_key": public_key
-				}}, function (err, user) {
-				if (err) throw Error('Public key error!');
-				console.log(user);
-				console.log(`User ${user._id} logged in!`);
-			});
+				}}, {new: true});
 		}
 		throw Error('Incorrect password!');
 	}
@@ -57,11 +53,7 @@ UserSchema.statics.logout = async function(user_id) {
 	if (mongoose.Types.ObjectId.isValid(user_id)) {
 		return await this.findByIdAndUpdate(user_id, {$set: { 
 			"public_key": ""
-			}}, function (err, user) {
-			if (err) throw Error('Public key error!');
-			console.log(user);
-			console.log(`User ${user._id} logged out!`);
-		});
+			}}, {new: true});
 	}
 	throw Error('Incorrect user_id!');
 }
