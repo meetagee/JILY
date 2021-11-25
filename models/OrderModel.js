@@ -11,6 +11,7 @@ const OrderSchema = new mongoose.Schema({
         required: true
     },
     status: {
+        type: String,
         enum: ["Waiting for Confirmation", "In Progress", "Ready For Pickup", "Completed", "Canceled"],
         default: "Waiting for Confirmation",
         required: true

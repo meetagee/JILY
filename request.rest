@@ -1,0 +1,15 @@
+POST http://localhost:5000/user/signup
+Content-Type: application/json
+
+{
+    "username": "yash",
+    "password": "123456",
+    "type": "Customer"
+}
+###
+
+POST http://localhost:5000/user/login
+
+###
+
+GET http://localhost:5000/user/logout
