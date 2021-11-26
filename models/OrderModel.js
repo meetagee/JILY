@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
+const crypto = require("crypto");
 
 const OrderSchema = new mongoose.Schema({
 
-    restaurant_id: {
+    merchant_id: {
         type: Number,
         required: true
     },
@@ -18,7 +19,7 @@ const OrderSchema = new mongoose.Schema({
     },
     secret: {
         type: String,
-        required: true
+        required: false
     },
 
 });

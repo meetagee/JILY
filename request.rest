@@ -20,3 +20,42 @@ Content-Type: application/json
 ###
 
 GET http://localhost:5000/user/logout/619f417f99d4b918d6eec675
+
+####
+POST http://localhost:5000/order/new-order/
+Content-Type: application/json
+
+{   
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY", 
+    "restaurant_id": "123123",
+    "items": [
+        "veggie bowl",
+        "veggie drink",
+        "veggie salad"
+    ]
+}
+#####
+
+POST http://localhost:5000/order/new-order/
+Content-Type: application/json
+
+{   
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY", 
+    "restaurant_id": "123123",
+    "items": [
+        "veggie bowl",
+        "veggie drink",
+        "veggie salad"
+    ]
+}
+#####
+
+PUT http://localhost:5000/order/confirm/61a03e969c407a4f245ddc44/
+Content-Type: application/json
+
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY"
+     
+}
+
+#####

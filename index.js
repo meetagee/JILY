@@ -12,6 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}))
 
 app.use("/user", require("./routes/UserRouter"));
+app.use("/order", require("./routes/OrderRouter"));
 
 // Connect to MongoDB
 const MONGODBURL = "mongodb://localhost:27017/JILY"
