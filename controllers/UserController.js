@@ -72,13 +72,22 @@ const logout_get = async (req, res) => {
 };
 
 const merchants_get = async (req, res) => {
-    merchants = await Users.find({type: "Merchant"});
-    res.status(200).json({orders});
+    const merchants = await Users.find({type: "Merchant"}).select('username');
+    res.status(200).json({merchants});
+};
+
+const user_get = async (req, res) => {
+    const merchant = await Users.findById(req.params.id, (err) => {
+        console.log(err);
+        res.status(404).json({user: "User not found"});
+    }).select('username type');
+    res.status(200).json({merchant});
 };
 
 module.exports = {
     signup_post,
     login_post,
     logout_get,
-    merchants_get
+    merchants_get,
+    user_get
 }
