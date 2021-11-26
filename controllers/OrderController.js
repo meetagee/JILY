@@ -22,11 +22,6 @@ const encrypt_data = (public_key, data) => {
       ).toString("base64");
 }
 
-const generate_qr_code = (data) => {
-    // Todo: implement this method
-    return data;
-}
-
 const confirm_order = async (req, res) => {
     const order_id = req.params.order_id;
     const user = res.locals.user;
@@ -87,7 +82,7 @@ const mark_order_ready = async (req, res) => {
 
 }
 
-const get_qr_code = async (req, res) => {
+const get_order_secret = async (req, res) => {
     const order_id = req.params.order_id;
     const user = res.locals.user;
     const order = await Order.findById(order_id);
@@ -114,11 +109,10 @@ const get_qr_code = async (req, res) => {
         res.status(500).json({order: 'Internal error: please contact customer service!'});
     }
 
-    const encrypted_secret = encrypt_data(merchant.public_key, order.secret);
-    const qr_code = generate_qr_code(encrypted_secret);
-    const encrypted_qr_code = encrypt_data(user.public_key, qr_code);
+    const encrypted_secret_merchant = encrypt_data(merchant.public_key, order.secret);
+    const encrypted_secret = encrypt_data(user.public_key, encrypted_secret_merchant);
 
-    res.status(200).json({order_id: order._id, status: order.status, qr_code: encrypted_qr_code});
+    res.status(200).json({order_id: order._id, status: order.status, secret: encrypted_secret});
 }
 
 const mark_order_completed = async (req, res) => {
@@ -188,5 +182,5 @@ module.exports = {
     create_order,
     get_orders,
     get_order_by_id,
-    get_qr_code
+    get_order_secret
 }
