@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema({
-
+    customer_id: {
+        type: Number,
+        required: true
+    },
     restaurant_id: {
         type: Number,
         required: true
