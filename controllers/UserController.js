@@ -71,8 +71,14 @@ const logout_get = async (req, res) => {
     }
 };
 
+const merchants_get = async (req, res) => {
+    merchants = await Users.find({type: "Merchant"});
+    res.status(200).json({orders});
+};
+
 module.exports = {
     signup_post,
     login_post,
-    logout_get
+    logout_get,
+    merchants_get
 }
