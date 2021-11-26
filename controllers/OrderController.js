@@ -3,11 +3,23 @@ const Order = require('../models/OrderModel');
 
 const confirm_order = async (req, res) => {
     const order_id = req.params.order_id
-    
+
+    Order.findByIdAndUpdate(order_id, {status: "In Progress"}, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
+
 }
 
 const mark_order_ready = async (req, res) => {
-    pass
+    const order_id = req.params.order_id
+
+    Order.findByIdAndUpdate(order_id, {status: "Ready For Pickup"}, (err) => {
+        if (err) {
+            console.log(err)
+        }
+    })
 }
 
 const mark_order_completed = async (req, res) => {
