@@ -24,20 +24,12 @@ const mark_order_ready = async (req, res) => {
 
 const mark_order_completed = async (req, res) => {
     const order_id = req.params.order_id
-    const {user_id, secret} = req.body 
-    const user = await User.findById(user_id);
+    const {secret} = req.body 
+    const user = res.locals.user
     const order = await User.findById(order_id);
-
-    if (!user) {
-        res.status(404).json({merchant: "Merchant not found!"});
-    }
 
     if (!order) {
         res.status(404).json({order: "Order not found!"});
-    }
-
-    if (!(user.type === "Merchant")) {
-        res.status(401).json({customer: "Customer cannot mark order as picked up!"});
     }
 
     if (!(order.restaurant_id === order_id)) {
@@ -48,11 +40,19 @@ const mark_order_completed = async (req, res) => {
         res.status(400).json({secret: 'The secret does not match!'});
     }
 
+    if (!(order.status === "Ready For Pickup")) {
+        res.status(400).json({status: 'The order is not ready for pickup!'});
+    }
+
     const updated_order = await this.findByIdAndUpdate(order._id, {$set: { 
         "status": "Completed"
-        }}, {new: true});
+        }}, (err) => {
+            if (err) {
+                res.status(400).json({status: 'The order could not be marked as completed!'});
+            }
+        });
     
-    res.status(200).json()
+    res.status(200).json({order_id: order._id, status: order.status});
 
 }
 
@@ -60,7 +60,7 @@ const create_order = async (req, res) => {
     const {user_id, restaurant_id, items} = req.body
     try {
         const order = await Order.create({customer_id: user_id, restaurant_id, items});
-        res.status(201).json({order_id: order._id});
+        res.status(201).json({order_id: order._id, status: order.status});
     } catch (err) {
         console.log(err)
     }
