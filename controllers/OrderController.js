@@ -67,7 +67,18 @@ const create_order = async (req, res) => {
 }
 
 const get_orders = async (req, res) => {
-    pass
+    const user = res.locals.user
+
+    orders = await Order.find( (user.type == "Customer") ? {customer_id: user._id} : {merchant_id: user._id});
+    res.status(201).json({orders});
+
+}
+
+const get_order_by_id = async (req, res) => {
+    order = await Order.findById(req.params.order_id, (err) => {
+        res.status(404).json({order: "Order not found"})
+    })
+    res.status(201).json({order})
 }
 
 module.exports = {
