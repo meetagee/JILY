@@ -25,7 +25,11 @@ const UserSchema = new mongoose.Schema({
 		type: String,
         enum: customerType,
         required: [true, 'Please enter a type (Customer or Merchant)!']
-    }
+    },
+	firebase_token: {
+		type: String,
+		required: false
+	}
 
 });
 
