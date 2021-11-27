@@ -2,6 +2,7 @@ const User = require('../models/UserModel');
 const Order = require('../models/OrderModel');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const notifyUser = require('../utils/notification');
 
 
 const generate_secret = (order) => {

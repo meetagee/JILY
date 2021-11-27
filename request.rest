@@ -5,7 +5,8 @@ Content-Type: application/json
     "username": "yash",
     "password": "123456",
     "public_key": "",
-    "type": "Customer"
+    "type": "Customer",
+    "firebase_token": "SampleToken"
 }
 ###
 

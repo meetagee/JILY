@@ -35,9 +35,9 @@ const createToken = (id) => {
 };
 
 const signup_post = async (req, res) => {
-    const {username, password, public_key, type} = req.body;
+    const {username, password, public_key, type, firebase_token} = req.body;
     try {
-        const user = await User.create({username, password, public_key, type});
+        const user = await User.create({username, password, public_key, type, firebase_token});
         const token = createToken(user._id);
         res.status(201).json({user: user._id, access_token: token});
     } catch (err) {

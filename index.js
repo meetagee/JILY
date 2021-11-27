@@ -3,7 +3,7 @@ const logger = require('./utils/logger')
 const mongoose = require('mongoose');
 const debug = require('debug');
 const firebase_admin = require("firebase-admin");
-const serviceAccount = require("jily-cpen442-firebase-adminsdk-tfljx-c6e2f07401.json");
+const serviceAccount = require("./jily-cpen442-firebase-adminsdk-tfljx-c6e2f07401.json");
 require('dotenv').config();
 
 const app = express();
@@ -26,6 +26,6 @@ mongoose.connect(MONGODBURL, {useNewUrlParser: true, useUnifiedTopology: true})
 	.catch((err) => console.log("Error connecting to database", err));
 
 // Initialize firebase 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+firebase_admin.initializeApp({
+    credential: firebase_admin.credential.cert(serviceAccount)
 });
