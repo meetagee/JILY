@@ -1,16 +1,16 @@
 package com.example.jily.connectivity;
 
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
 import com.example.jily.model.Id;
-import com.example.jily.model.Profile;
 import com.example.jily.model.Jily;
+import com.example.jily.model.Profile;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import android.os.Message;
-import android.os.Handler;
-import android.util.Log;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -26,9 +26,9 @@ public class ServerInterface {
     // Placeholder for server address:port pair to connect to backend
     private static final String BASE_URL = "http://127.0.0.1:8081/Jily/";
 
-    private final int UNAUTHORIZED  = 401;
-    private final int FORBIDDEN     = 403;
-    private final int NOT_FOUND     = 404;
+    private final int UNAUTHORIZED = 401;
+    private final int FORBIDDEN = 403;
+    private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
 
     private final ServerEndpoint server;
@@ -106,15 +106,13 @@ public class ServerInterface {
                             0,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == UNAUTHORIZED) {
+                } else if (response.code() == UNAUTHORIZED) {
                     // Tell user login was not successful
                     stdResponse(response,
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
                             0,
                             MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
-                }
-                else {
+                } else {
                     // Tell user that no account was associated with those credentials
                     Message readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
@@ -142,8 +140,7 @@ public class ServerInterface {
                             0,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else {
+                } else {
                     try {
                         Log.e("Logout Reponse", response.errorBody().string());
                     } catch (IOException e) {
@@ -182,15 +179,13 @@ public class ServerInterface {
                             MessageConstants.REQUEST_CREATE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == UNPROCESSABLE) {
+                } else if (response.code() == UNPROCESSABLE) {
                     // Tell user there was an error with an input
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_CREATE,
                             MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                }
-                else {
+                } else {
                     try {
                         Log.e("Create User Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -217,8 +212,7 @@ public class ServerInterface {
                             MessageConstants.REQUEST_DELETE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else {
+                } else {
                     try {
                         Log.e("Delete User Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -241,7 +235,8 @@ public class ServerInterface {
                 if (response.isSuccessful()) {
                     try {
                         Gson gson = new Gson();
-                        Type fields = new TypeToken<List<Jily<User>>>(){}.getType();
+                        Type fields = new TypeToken<List<Jily<User>>>() {
+                        }.getType();
                         List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
                         // Send user details
                         Message readMsg = mHandler.obtainMessage(
@@ -253,15 +248,13 @@ public class ServerInterface {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else if (response.code() == NOT_FOUND) {
+                } else if (response.code() == NOT_FOUND) {
                     // Tell user their details were not found
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_GET,
                             MessageConstants.OPERATION_FAILURE_NOT_FOUND);
-                }
-                else {
+                } else {
                     try {
                         Log.e("User Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -289,8 +282,7 @@ public class ServerInterface {
                             MessageConstants.OPERATION_SUCCESS,
                             response.body());
                     readMsg.sendToTarget();
-                }
-                else {
+                } else {
                     try {
                         Log.e("User Profile Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -317,22 +309,19 @@ public class ServerInterface {
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == UNAUTHORIZED) {
+                } else if (response.code() == UNAUTHORIZED) {
                     // Tell user updating was unsuccessful
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
-                }
-                else if (response.code() == UNPROCESSABLE) {
+                } else if (response.code() == UNPROCESSABLE) {
                     // Tell user they cannot change their username
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                }
-                else {
+                } else {
                     try {
                         Log.e("Update User Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -358,7 +347,8 @@ public class ServerInterface {
                 if (response.isSuccessful()) {
                     try {
                         Gson gson = new Gson();
-                        Type fields = new TypeToken<List<Jily<Profile>>>(){}.getType();
+                        Type fields = new TypeToken<List<Jily<Profile>>>() {
+                        }.getType();
                         List<Jily<Profile>> profile = gson.fromJson(response.body().string(), fields);
                         // Send profile details
                         Message readMsg = mHandler.obtainMessage(
@@ -370,15 +360,13 @@ public class ServerInterface {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else if (response.code() == NOT_FOUND) {
+                } else if (response.code() == NOT_FOUND) {
                     // Tell user profile details were not found
                     stdResponse(response,
                             MessageConstants.MESSAGE_PROFILE_RESPONSE,
                             MessageConstants.REQUEST_GET,
                             MessageConstants.OPERATION_FAILURE_NOT_FOUND);
-                }
-                else {
+                } else {
                     try {
                         Log.e("Profile Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -405,22 +393,19 @@ public class ServerInterface {
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == FORBIDDEN) {
+                } else if (response.code() == FORBIDDEN) {
                     // Tell user updating profile was unsuccessful
                     stdResponse(response,
                             MessageConstants.MESSAGE_PROFILE_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_FORBIDDEN);
-                }
-                else if (response.code() == UNPROCESSABLE) {
+                } else if (response.code() == UNPROCESSABLE) {
                     // Tell user there was an error with an input
                     stdResponse(response,
                             MessageConstants.MESSAGE_PROFILE_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                }
-                else {
+                } else {
                     try {
                         Log.e("Update Profile Response", response.errorBody().string());
                     } catch (IOException e) {
@@ -440,6 +425,46 @@ public class ServerInterface {
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
+    public void getMerchants() {
+        server.getMerchants().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        Gson gson = new Gson();
+                        Type fields = new TypeToken<List<Jily<User>>>() {
+                        }.getType();
+                        List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
+                        // Send merchants details
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_USER_RESPONSE,
+                                MessageConstants.REQUEST_GET,
+                                MessageConstants.OPERATION_SUCCESS,
+                                user);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == NOT_FOUND) {
+                    // Tell user the merchants were not found
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_USER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
+                } else {
+                    try {
+                        Log.e("Merchants Response", response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            }
+        });
+    }
 
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS

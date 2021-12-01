@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +15,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.jily.databinding.FragmentRestaurantsBinding;
+
+import java.util.List;
 
 public class RestaurantsFragment extends Fragment {
 
@@ -27,13 +31,22 @@ public class RestaurantsFragment extends Fragment {
         binding = FragmentRestaurantsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textGallery;
+        final TextView textView = binding.textRestaurants;
         galleryViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);
             }
         });
+
+        final ListView listView = binding.listRestaurants;
+        galleryViewModel.getList().observe(getViewLifecycleOwner(), new Observer<List<String>>() {
+            @Override
+            public void onChanged(@Nullable List<String> inList) {
+                listView.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_selectable_list_item, inList));
+            }
+        });
+
         return root;
     }
 
