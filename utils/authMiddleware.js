@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/UserModel');
 
 const requireAuth = (req, res, next) => {
-    const token = req.body.access_token;
-
+    const token = req.headers.access_token;
+    console.log(token)
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, async (err, decodedToken) => {
             if (err) {
@@ -26,7 +26,7 @@ const requireAuth = (req, res, next) => {
 };
 
 const checkMerchant = (req, res, next) => {
-    const token = req.body.access_token;
+    const token = req.headers.access_token;
 
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, async (err, decodedToken) => {

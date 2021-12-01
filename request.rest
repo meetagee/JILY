@@ -14,7 +14,7 @@ POST http://localhost:5000/user/login
 Content-Type: application/json
 
 {
-    "username": "yash",
+    "username": "yash1",
     "password": "123456",
     "public_key": "7777"
 }
@@ -60,3 +60,6 @@ Content-Type: application/json
 }
 
 #####
+
+GET http://localhost:5000/user/merchants
+access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTcxOWQ0MzkxMTQ3ZmQ3ZmY5YmQ0ZSIsImlhdCI6MTYzODM0MTk1MywiZXhwIjoxNjM4NjAxMTUzfQ.BAnoHNedT2fUXfRwpENNKaLqDZYbfXcMsjAao5ISD6g
