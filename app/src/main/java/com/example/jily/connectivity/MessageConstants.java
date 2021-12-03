@@ -36,6 +36,6 @@ public interface MessageConstants {
     int TRANSFER_BY_WIFI      = 1;
 
     // Constant defining the key in a key-value pair representing a signed-in user's email
-    String EMAIL = "Email";
+    String USERNAME = "Username";
 }
 

@@ -35,8 +35,8 @@ public interface ServerEndpoint {
     // USER HANDLERS (TODO: Placeholders for now)
     //----------------------------------------------------------------------------------------------
     @Headers("Content-Type:application/json")
-    @POST("users/")
-    Call<ResponseBody> createUser(@Body List<Jily<User>> user);
+    @POST("user/signup")
+    Call<ResponseBody> createUser(@Body User user);
 
     @DELETE("users/{user_id}/")
     Call<ResponseBody> deleteUser(@Path("user_id") Integer user_id);

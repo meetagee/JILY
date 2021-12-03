@@ -19,4 +19,7 @@
     <string name="text_settings">Settings</string>
     <string name="text_signup">Sign Up</string>
     <string name="text_welcome">Welcome to JILY.</string>
+
+    <string name="text_username">Username</string>
+    <string name="text_user_type">User type</string>
 </resources>

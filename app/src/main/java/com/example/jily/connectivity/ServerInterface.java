@@ -12,6 +12,8 @@ import android.os.Message;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -24,7 +26,9 @@ import retrofit2.Response;
 public class ServerInterface {
 
     // Placeholder for server address:port pair to connect to backend
-    private static final String BASE_URL = "http://127.0.0.1:8081/Jily/";
+    private static final String DEBUG_IP = "<YOUR IP HERE>";
+    private static final String DEBUG_PORT = "5000";
+    private static final String BASE_URL = "http://" + DEBUG_IP + ":"+ DEBUG_PORT +"/";
 
     private final int UNAUTHORIZED  = 401;
     private final int FORBIDDEN     = 403;
@@ -145,7 +149,7 @@ public class ServerInterface {
                 }
                 else {
                     try {
-                        Log.e("Logout Reponse", response.errorBody().string());
+                        Log.e("Logout Response", response.errorBody().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -162,17 +166,18 @@ public class ServerInterface {
     //----------------------------------------------------------------------------------------------
     // USER HANDLERS (TODO: Placeholders for now)
     //----------------------------------------------------------------------------------------------
-    public void createUser(List<Jily<User>> user) {
+    public void createUser(User user) {
         server.createUser(user).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         // Save IDs
                         Gson gson = new Gson();
-                        Id id = gson.fromJson(response.body().string(), Id.class);
-                        userId = id.getUserId();
-                        profileId = id.getProfileId();
+                        assert response.body() != null;
+                        RuntimeManager runtimeManager = RuntimeManager.getInstance();
+                        User user = gson.fromJson(response.body().string(), User.class);
+                        runtimeManager.setCurrentUser(user);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -183,25 +188,26 @@ public class ServerInterface {
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
                 }
-                else if (response.code() == UNPROCESSABLE) {
-                    // Tell user there was an error with an input
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_CREATE,
-                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                }
                 else {
                     try {
-                        Log.e("Create User Response", response.errorBody().string());
+                        assert response.errorBody() != null;
+                        Log.d("[ServerInterface] CreateUser:", "Request error: " + response.errorBody().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+                    // Tell user we encountered a failure
+                    Message readMsg = mHandler.obtainMessage(
+                            MessageConstants.MESSAGE_USER_RESPONSE,
+                            MessageConstants.REQUEST_CREATE,
+                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
+                    readMsg.sendToTarget();
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("Create User Error", t.getMessage());
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Log.e("[ServerInterface] CreateUser:", "Failure:" + t.getMessage());
             }
         });
     }
