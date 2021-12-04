@@ -9,25 +9,24 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.jily.connectivity.ServerInterface;
+import com.example.jily.model.Restaurant;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RestaurantsViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
-    private MutableLiveData<List<String>> mList;
+    private MutableLiveData<ArrayList<Restaurant>> mList;
     private ServerInterface mServerIf;
     private Handler mHandler;
 
-
     public RestaurantsViewModel() {
         mText = new MutableLiveData<>();
-
         mServerIf = ServerInterface.getInstance();
         mHandler = new Handler();
+
         boolean bMerchantsExist = false;
-        List<String> resList = new ArrayList<String>();
+        ArrayList<Restaurant> restaurants = new ArrayList<>();
         try {
             mServerIf.setHandler(mHandler);
             mServerIf.getMerchants();
@@ -41,7 +40,7 @@ public class RestaurantsViewModel extends ViewModel {
             Log.e("RestaurantsViewModel", e.toString());
         }
 
-        mList = new MutableLiveData<List<String>>(resList);
+        mList = new MutableLiveData<>(restaurants);
         if (bMerchantsExist) {
             mText.setValue("");
         }
@@ -51,7 +50,7 @@ public class RestaurantsViewModel extends ViewModel {
         return mText;
     }
 
-    public LiveData<List<String>> getList() {
+    public LiveData<ArrayList<Restaurant>> getList() {
         return mList;
     }
 }
