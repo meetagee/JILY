@@ -1,6 +1,5 @@
 package com.example.jily.connectivity;
 
-import com.example.jily.model.Profile;
 import com.example.jily.model.Jily;
 import com.example.jily.model.User;
 
@@ -44,24 +43,10 @@ public interface ServerEndpoint {
     @GET("users/{user_id}/")
     Call<ResponseBody> getUser(@Path("user_id") Integer user_id);
 
-    @GET("users/{user_id}/profile/")
-    Call<Integer> getUserProfile(@Path("user_id") Integer user_id);
-
     @Headers("Content-Type:application/json")
     @PUT("users/{user_id}/")
     Call<ResponseBody> updateUser(@Path("user_id") Integer user_id,
                                   @Body List<Jily<User>> user);
-
-    //----------------------------------------------------------------------------------------------
-    // PROFILE HANDLERS (TODO: Placeholders for now)
-    //----------------------------------------------------------------------------------------------
-    @GET("profiles/{profile_id}")
-    Call<ResponseBody> getProfile(@Path("profile_id") Integer profile_id);
-
-    @Headers("Content-Type:application/json")
-    @PUT("profiles/{profile_id}/")
-    Call<ResponseBody> updateProfile(@Path("profile_id") Integer profile_id,
-                                     @Body List<Jily<Profile>> profile);
 
     //----------------------------------------------------------------------------------------------
     // RESTAURANT HANDLERS

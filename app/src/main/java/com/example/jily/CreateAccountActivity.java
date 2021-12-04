@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -41,7 +42,6 @@ public class CreateAccountActivity extends AppCompatActivity {
     private EditText mEditTextPassword;
     private UserType mUserType;
 
-    // TODO: [RAN OUT OF TIME] Set up a class that extends Handler and override handleMessage()
     private ServerInterface mServerIf;
     private final Handler mHandler = new Handler();
 
@@ -78,7 +78,7 @@ public class CreateAccountActivity extends AppCompatActivity {
             }
 
             @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView textView = (TextView) view;
                 if (position == 0) {
