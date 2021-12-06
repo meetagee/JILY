@@ -26,7 +26,7 @@ public class RestaurantsViewModel extends ViewModel {
     public RestaurantsViewModel() {
         mText = new MutableLiveData<>();
         mServerIf = ServerInterface.getInstance();
-        mHandler = new RestaurantHandler();
+        mHandler = new RestaurantsHandler();
     }
 
     public LiveData<String> getText() {
@@ -43,14 +43,16 @@ public class RestaurantsViewModel extends ViewModel {
         return mList;
     }
 
-    private class RestaurantHandler extends Handler {
+    public Handler getHandler() { return mHandler; }
+
+    private class RestaurantsHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             if (msg.arg2 == MessageConstants.OPERATION_SUCCESS) {
                 Restaurant restaurant = (Restaurant) msg.obj;
                 ArrayList<User> merchants = new ArrayList<>(restaurant.getMerchants());
                 mList.postValue(merchants);
-                mText.setValue("");
+                mText.postValue("");
             }
         }
     }

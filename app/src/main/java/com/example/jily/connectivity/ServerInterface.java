@@ -7,9 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
-import com.example.jily.model.Jily;
+import com.example.jily.model.Order;
 import com.example.jily.model.Restaurant;
-import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.example.jily.utility.DebugConstants;
 import com.google.gson.Gson;
@@ -17,7 +16,6 @@ import com.google.gson.Gson;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -30,10 +28,13 @@ public class ServerInterface {
     private static final String SERVER_IP = "<YOUR IP HERE>";
     private static final String SERVER_PORT = "5000";
     private static volatile ServerInterface instance;
+
+    private final int BAD_REQUEST = 400;
     private final int UNAUTHORIZED = 401;
     private final int FORBIDDEN = 403;
     private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
+
     private final ServerEndpoint server;
     private Handler mHandler;
 
@@ -76,15 +77,14 @@ public class ServerInterface {
     }
 
     //----------------------------------------------------------------------------------------------
-    // STDRESPONSE HANDLER (TODO: Placeholders for now)
+    // STDRESPONSE HANDLER
     //----------------------------------------------------------------------------------------------
     private void stdResponse(Response<ResponseBody> response,
                              int responseType, int request, int reason) {
-        Gson gson = new Gson();
-        StdResponse error = null;
+        String error = null;
         try {
             assert response.errorBody() != null;
-            error = gson.fromJson(response.errorBody().string(), StdResponse.class);
+            error = response.errorBody().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -282,74 +282,6 @@ public class ServerInterface {
         });
     }
 
-    public void deleteUser(Integer user_id) {
-        server.deleteUser(user_id).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    // Tell user we successfully deleted their account
-                    Message readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_DELETE,
-                            MessageConstants.OPERATION_SUCCESS);
-                    readMsg.sendToTarget();
-                } else {
-                    try {
-                        assert response.errorBody() != null;
-                        Log.e("Delete User Response", response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.e("Delete User Error", t.getMessage());
-            }
-        });
-    }
-
-    public void updateUser(Integer user_id, List<Jily<User>> user) {
-        server.updateUser(user_id, user).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    // Tell user their details were updated
-                    Message readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_UPDATE,
-                            MessageConstants.OPERATION_SUCCESS);
-                    readMsg.sendToTarget();
-                } else if (response.code() == UNAUTHORIZED) {
-                    // Tell user updating was unsuccessful
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_UPDATE,
-                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
-                } else if (response.code() == UNPROCESSABLE) {
-                    // Tell user they cannot change their username
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_UPDATE,
-                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                } else {
-                    try {
-                        assert response.errorBody() != null;
-                        Log.e("Update User Response", response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.e("Update User Error", t.getMessage());
-            }
-        });
-    }
-
     //----------------------------------------------------------------------------------------------
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
@@ -357,34 +289,33 @@ public class ServerInterface {
         server.getMerchants(user.getAccessToken()).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                Message readMsg;
-                Gson gson = new Gson();
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
+                        Gson gson = new Gson();
                         Restaurant merchants = gson.fromJson(response.body().string(), Restaurant.class);
                         if (merchants.getMerchants().size() > 0) {
-                            // Send merchants details
-                            readMsg = mHandler.obtainMessage(
-                                    MessageConstants.MESSAGE_USER_RESPONSE,
+                            // Send merchant's details
+                            Message readMsg = mHandler.obtainMessage(
+                                    MessageConstants.MESSAGE_RESTAURANT_RESPONSE,
                                     MessageConstants.REQUEST_GET,
                                     MessageConstants.OPERATION_SUCCESS,
                                     merchants);
+                            readMsg.sendToTarget();
                         } else {
                             // Tell user no merchants were found
-                            readMsg = mHandler.obtainMessage(
-                                    MessageConstants.MESSAGE_USER_RESPONSE,
+                            stdResponse(response,
+                                    MessageConstants.MESSAGE_RESTAURANT_RESPONSE,
                                     MessageConstants.REQUEST_GET,
-                                    MessageConstants.OPERATION_FAILURE_NOT_FOUND,
-                                    merchants);
+                                    MessageConstants.OPERATION_FAILURE_NOT_FOUND);
                         }
-                        readMsg.sendToTarget();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 } else {
                     try {
-                        Log.e("Merchants Response", response.errorBody().string());
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] GetMerchants:", "Response:" + response.errorBody().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -402,4 +333,45 @@ public class ServerInterface {
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
+    public void createOrder(User user, Order order) {
+        server.createOrder(user.getAccessToken(), order).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        Gson gson = new Gson();
+                        Order order = gson.fromJson(response.body().string(), Order.class);
+                        // Create a new order
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_ORDER_RESPONSE,
+                                MessageConstants.REQUEST_CREATE,
+                                MessageConstants.OPERATION_SUCCESS,
+                                order);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == BAD_REQUEST) {
+                    // Tell user their order was not created properly
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_CREATE,
+                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] CreateOrder:", "Response:" + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] CreateOrder:", "Failure:" + t.getMessage());
+            }
+        });
+    }
 }
