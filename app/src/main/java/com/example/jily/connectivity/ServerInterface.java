@@ -36,7 +36,6 @@ public class ServerInterface {
     private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
     private final ServerEndpoint server;
-    public int userId, profileId;
     private Handler mHandler;
 
     private ServerInterface() {
@@ -106,8 +105,10 @@ public class ServerInterface {
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
-                        User user = gson.fromJson(response.body().string(), User.class);
-                        RuntimeManager.getInstance().getCurrentUser().setAccessToken(user.getAccessToken());
+                        User recvUser = gson.fromJson(response.body().string(), User.class);
+                        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+                        currentUser.setAccessToken(recvUser.getAccessToken());
+                        currentUser.setUserId(recvUser.getUserId());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -156,30 +157,35 @@ public class ServerInterface {
         });
     }
 
-    public void logout() {
-        server.logout().enqueue(new Callback<ResponseBody>() {
+    public void logout(User user) {
+        server.logout(user.getUserId()).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
                 if (response.isSuccessful()) {
-                    // Tell user we successfully logged out
-                    Message readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_LOGOUT_RESPONSE,
-                            0,
-                            MessageConstants.OPERATION_SUCCESS);
-                    readMsg.sendToTarget();
-                } else {
                     try {
-                        assert response.errorBody() != null;
-                        Log.e("Logout Response", response.errorBody().string());
-                    } catch (IOException e) {
+                        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+                        currentUser.clearCurrentUser();
+                    } catch (Throwable e) {
                         e.printStackTrace();
                     }
+                    // Tell user we successfully created their details
+                    readMsg = mHandler.obtainMessage(
+                            MessageConstants.MESSAGE_LOGOUT_RESPONSE,
+                            MessageConstants.REQUEST_CREATE,
+                            MessageConstants.OPERATION_SUCCESS);
+                } else {
+                    readMsg = mHandler.obtainMessage(
+                            MessageConstants.MESSAGE_LOGOUT_RESPONSE,
+                            MessageConstants.REQUEST_CREATE,
+                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
                 }
+                readMsg.sendToTarget();
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.e("Logout Error", t.getMessage());
+                Log.e("[ServerInterface] Logout", t.getMessage());
             }
         });
     }
@@ -196,8 +202,10 @@ public class ServerInterface {
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
-                        User user = gson.fromJson(response.body().string(), User.class);
-                        RuntimeManager.getInstance().getCurrentUser().setAccessToken(user.getAccessToken());
+                        User recvUser = gson.fromJson(response.body().string(), User.class);
+                        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+                        currentUser.setAccessToken(recvUser.getAccessToken());
+                        currentUser.setUserId(recvUser.getUserId());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -233,7 +241,44 @@ public class ServerInterface {
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.e("[ServerInterface] CreateUser:", "Failure:" + t.getMessage());
+                Log.e("[ServerInterface] CreateUser", "Failure:" + t.getMessage());
+            }
+        });
+    }
+
+    public void getUserType(User user) {
+        server.getUserType(user.getAccessToken(), user.getUserId()).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
+                Gson gson = new Gson();
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        User recvUser = gson.fromJson(response.body().string(), User.class);
+                        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+                        currentUser.setUserType(recvUser.getUserType());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    // Tell user we successfully created their details
+                    readMsg = mHandler.obtainMessage(
+                            MessageConstants.MESSAGE_USER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_SUCCESS);
+                } else {
+                    // Tell user we encountered a failure
+                    readMsg = mHandler.obtainMessage(
+                            MessageConstants.MESSAGE_USER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
+                }
+                readMsg.sendToTarget();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Log.e("[ServerInterface] GetUserType", "Failure:" + t.getMessage());
             }
         });
     }
@@ -262,50 +307,6 @@ public class ServerInterface {
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("Delete User Error", t.getMessage());
-            }
-        });
-    }
-
-    public void getUser(Integer user_id) {
-        server.getUser(user_id).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        Gson gson = new Gson();
-                        Type fields = new TypeToken<List<Jily<User>>>() {
-                        }.getType();
-                        assert response.body() != null;
-                        List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
-                        // Send user details
-                        Message readMsg = mHandler.obtainMessage(
-                                MessageConstants.MESSAGE_USER_RESPONSE,
-                                MessageConstants.REQUEST_GET,
-                                MessageConstants.OPERATION_SUCCESS,
-                                user);
-                        readMsg.sendToTarget();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (response.code() == NOT_FOUND) {
-                    // Tell user their details were not found
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_GET,
-                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
-                } else {
-                    try {
-                        assert response.errorBody() != null;
-                        Log.e("User Response", response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-
             }
         });
     }

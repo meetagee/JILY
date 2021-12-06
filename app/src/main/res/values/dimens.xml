@@ -19,4 +19,5 @@
     <dimen name="width_button_back">25dp</dimen>
     <dimen name="width_button_more">25dp</dimen>
     <dimen name="width_max">264dp</dimen>
+    <dimen name="width_max_settings">372dp</dimen>
 </resources>

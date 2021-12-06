@@ -149,7 +149,8 @@ public class CreateAccountActivity extends AppCompatActivity {
                         Base64.getEncoder().encodeToString(signUpPubKey.getEncoded()),
                         mUserType.toString(),
                         User.DUMMY_FIREBASE_TOKEN,
-                        User.DUMMY_ACCESS_TOKEN);
+                        User.DUMMY_ACCESS_TOKEN,
+                        User.DUMMY_USER_ID);
                 newUser.setPrivateKey(signUpPrivateKey);
 
                 RuntimeManager.getInstance().setCurrentUser(newUser);
