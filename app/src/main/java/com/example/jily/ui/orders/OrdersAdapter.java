@@ -2,7 +2,6 @@ package com.example.jily.ui.orders;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +33,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
         public TextView textOrderTitle;
         public TextView textOrderStatus;
-        public ImageView containerQrCode;
         public View layout;
 
         // Provide a reference to the views for each order
@@ -81,20 +79,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
         holder.textOrderTitle.setText(name);
         holder.textOrderTitle.setOnClickListener(v -> {
-            // TODO: Generate QR code and attach to ImageView
-            // generateQrCode(holder.containerQrCode, status);
-
-            // Inflate a dialog with the contents of the QR code
+            // Inflate a dialog with a QR code of the encrypted message
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            AlertDialog dialog = new AlertDialog.Builder(mContext)
-                    .setView(inflater.inflate(R.layout.view_qr_code, null))
-                    .setTitle("Your confirmation QR code")
-                    .setPositiveButton("Close", null).create();
-
-            dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setTextColor(mContext.getResources().getColor(R.color.primary)));
-
-            dialog.show();
+            View view = inflater.inflate(
+                    R.layout.view_qr_code, (ViewGroup) v.getParent(), false);
+            initDialog(view, name);
         });
 
         holder.textOrderStatus.setText(status);
@@ -106,17 +95,39 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         return orders.size();
     }
 
-    // TODO: Fix generation of QR code
-    public void generateQrCode(ImageView container, String status) {
+    //----------------------------------------------------------------------------------------------
+    // QR CODE HANDLERS
+    //----------------------------------------------------------------------------------------------
+    private void initDialog(@NonNull View v, String message) {
+        // Generate a QR code and set it as the contents of the image view
+        ImageView containerQrCode = v.findViewById(R.id.container_qr_code);
+        containerQrCode.setImageBitmap(generateQrCode(message));
+
+        // Create a dialog to display the QR code to the user
+        AlertDialog dialog = new AlertDialog.Builder(mContext)
+                .setView(v)
+                .setTitle("Your confirmation QR code")
+                .setPositiveButton("Close", null).create();
+
+        dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(mContext.getResources().getColor(R.color.primary)));
+
+        dialog.show();
+    }
+
+    private Bitmap generateQrCode(String status) {
         MultiFormatWriter writer = new MultiFormatWriter();
+        Bitmap bitmap = null;
+        int dimen = 350;
 
         try {
-            BitMatrix matrix = writer.encode(status, BarcodeFormat.QR_CODE, 350, 350);
+            BitMatrix matrix = writer.encode(status, BarcodeFormat.QR_CODE, dimen, dimen);
             BarcodeEncoder encoder = new BarcodeEncoder();
-            Bitmap bitmap = encoder.createBitmap(matrix);
-            container.setImageBitmap(bitmap);
+            bitmap = encoder.createBitmap(matrix);
         } catch (WriterException e) {
             e.printStackTrace();
         }
+
+        return bitmap;
     }
 }
