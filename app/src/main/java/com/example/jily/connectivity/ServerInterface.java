@@ -1,5 +1,11 @@
 package com.example.jily.connectivity;
 
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
 import com.example.jily.model.Id;
 import com.example.jily.model.Jily;
 import com.example.jily.model.StdResponse;
@@ -7,11 +13,7 @@ import com.example.jily.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import android.os.Message;
-import android.os.Handler;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -25,20 +27,17 @@ import retrofit2.Response;
 public class ServerInterface {
 
     // Placeholder for server address:port pair to connect to backend
-    private static final String DEBUG_IP = "<YOUR IP HERE>";
+    private static final String DEBUG_IP = "192.168.10.102";
     private static final String DEBUG_PORT = "5000";
-    private static final String BASE_URL = "http://" + DEBUG_IP + ":"+ DEBUG_PORT +"/";
-
-    private final int UNAUTHORIZED  = 401;
-    private final int FORBIDDEN     = 403;
-    private final int NOT_FOUND     = 404;
+    private static final String BASE_URL = "http://" + DEBUG_IP + ":" + DEBUG_PORT + "/";
+    private static volatile ServerInterface instance;
+    private final int UNAUTHORIZED = 401;
+    private final int FORBIDDEN = 403;
+    private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
-
     private final ServerEndpoint server;
     public int userId, profileId;
     private Handler mHandler;
-
-    private static volatile ServerInterface instance;
 
     private ServerInterface() {
         server = getServerEndpoint();
@@ -61,13 +60,13 @@ public class ServerInterface {
         return instance;
     }
 
-    public void setHandler(Handler handler) {
-        mHandler = handler;
-    }
-
     private static ServerEndpoint getServerEndpoint() {
         ClientRetrofit.init(BASE_URL);
         return ClientRetrofit.getInstance().createAdapter().create(ServerEndpoint.class);
+    }
+
+    public void setHandler(Handler handler) {
+        mHandler = handler;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -111,15 +110,13 @@ public class ServerInterface {
                             0,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == UNAUTHORIZED) {
+                } else if (response.code() == UNAUTHORIZED) {
                     // Tell user login was not successful
                     stdResponse(response,
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
                             0,
                             MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
-                }
-                else {
+                } else {
                     // Tell user that no account was associated with those credentials
                     Message readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
@@ -147,8 +144,7 @@ public class ServerInterface {
                             0,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else {
+                } else {
                     try {
                         assert response.errorBody() != null;
                         Log.e("Logout Response", response.errorBody().string());
@@ -172,39 +168,44 @@ public class ServerInterface {
         server.createUser(user).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
+                Gson gson = new Gson();
                 if (response.isSuccessful()) {
                     try {
-                        // Save IDs
-                        Gson gson = new Gson();
                         assert response.body() != null;
-                        RuntimeManager runtimeManager = RuntimeManager.getInstance();
                         User user = gson.fromJson(response.body().string(), User.class);
-                        runtimeManager.setCurrentUser(user);
+                        RuntimeManager.getInstance().getCurrentUser().setAccessToken(user.getAccessToken());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     // Tell user we successfully created their details
-                    Message readMsg = mHandler.obtainMessage(
+                    readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_CREATE,
                             MessageConstants.OPERATION_SUCCESS);
-                    readMsg.sendToTarget();
-                }
-                else {
+                } else {
+                    boolean bDoesUserExist = false;
                     try {
                         assert response.errorBody() != null;
-                        Log.d("[ServerInterface] CreateUser:", "Request error: " + response.errorBody().string());
-                    } catch (IOException e) {
+                        JSONObject responseJson = new JSONObject(response.errorBody().string());
+                        JSONObject err = new JSONObject(responseJson.get("errors").toString());
+                        if (err.get("username").equals(MessageConstants.DUPLICATE_USER_ERR_STRING)) {
+                            bDoesUserExist = true;
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                     // Tell user we encountered a failure
-                    Message readMsg = mHandler.obtainMessage(
+                    int messageRetCode = (bDoesUserExist) ?
+                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED :
+                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE;
+                    readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_CREATE,
-                            MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                    readMsg.sendToTarget();
+                            messageRetCode);
                 }
+                readMsg.sendToTarget();
             }
 
             @Override
@@ -225,8 +226,7 @@ public class ServerInterface {
                             MessageConstants.REQUEST_DELETE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else {
+                } else {
                     try {
                         assert response.errorBody() != null;
                         Log.e("Delete User Response", response.errorBody().string());
@@ -250,7 +250,8 @@ public class ServerInterface {
                 if (response.isSuccessful()) {
                     try {
                         Gson gson = new Gson();
-                        Type fields = new TypeToken<List<Jily<User>>>(){}.getType();
+                        Type fields = new TypeToken<List<Jily<User>>>() {
+                        }.getType();
                         assert response.body() != null;
                         List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
                         // Send user details
@@ -263,15 +264,13 @@ public class ServerInterface {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else if (response.code() == NOT_FOUND) {
+                } else if (response.code() == NOT_FOUND) {
                     // Tell user their details were not found
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_GET,
                             MessageConstants.OPERATION_FAILURE_NOT_FOUND);
-                }
-                else {
+                } else {
                     try {
                         assert response.errorBody() != null;
                         Log.e("User Response", response.errorBody().string());
@@ -299,22 +298,19 @@ public class ServerInterface {
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_SUCCESS);
                     readMsg.sendToTarget();
-                }
-                else if (response.code() == UNAUTHORIZED) {
+                } else if (response.code() == UNAUTHORIZED) {
                     // Tell user updating was unsuccessful
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
-                }
-                else if (response.code() == UNPROCESSABLE) {
+                } else if (response.code() == UNPROCESSABLE) {
                     // Tell user they cannot change their username
                     stdResponse(response,
                             MessageConstants.MESSAGE_USER_RESPONSE,
                             MessageConstants.REQUEST_UPDATE,
                             MessageConstants.OPERATION_FAILURE_UNPROCESSABLE);
-                }
-                else {
+                } else {
                     try {
                         assert response.errorBody() != null;
                         Log.e("Update User Response", response.errorBody().string());

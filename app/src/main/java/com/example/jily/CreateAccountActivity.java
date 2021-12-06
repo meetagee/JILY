@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.os.Message;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,12 +23,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.jily.connectivity.MessageConstants;
+import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.User;
 import com.example.jily.model.User.UserType;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -43,7 +51,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     private UserType mUserType;
 
     private ServerInterface mServerIf;
-    private final Handler mHandler = new Handler();
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +65,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         initButtons();
 
         mServerIf = ServerInterface.getInstance();
+        mHandler = new CreateAccountHandler();
     }
 
     private List<String> initAvailableUserTypesList() {
@@ -133,30 +142,62 @@ public class CreateAccountActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please select an user type",
                         Toast.LENGTH_SHORT).show();
             } else {
+                KeyPairGenerator keyPairGen;
+                try {
+                    keyPairGen = KeyPairGenerator.getInstance(
+                            KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                    keyPairGen.initialize(new KeyGenParameterSpec.Builder(
+                            username,
+                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
+                                    | KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                            .setKeySize(User.KEY_SIZE)
+                            .build());
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Failed to initialize keys",
+                            Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    return;
+                }
+                KeyPair signupKeyPair = keyPairGen.generateKeyPair();
+                PublicKey signUpPubKey = signupKeyPair.getPublic();
+                PrivateKey signUpPrivateKey = signupKeyPair.getPrivate();
+
                 User newUser = new User(username,
                         password,
-                        User.DUMMY_PUBKEY,
+                        Base64.getEncoder().encodeToString(signUpPubKey.getEncoded()),
                         mUserType.toString(),
-                        User.DUMMY_FIREBASE_TOKEN);
-                boolean bSignupOk = false;
-                try {
-                    mServerIf.setHandler(mHandler);
-                    mServerIf.createUser(newUser);
-                    bSignupOk = mHandler.obtainMessage().arg2 == MessageConstants.OPERATION_SUCCESS;
-                } catch (Exception e) {
-                    Log.e("[CreateAccountActivity] Failed creating new user: ", e.toString());
-                }
+                        User.DUMMY_FIREBASE_TOKEN,
+                        User.DUMMY_ACCESS_TOKEN);
+                newUser.setPrivateKey(signUpPrivateKey);
 
-                if (bSignupOk) {
-                    Intent mainIntent = new Intent(getApplicationContext(), MainActivity.class);
-                    mainIntent.putExtra(MessageConstants.USERNAME, username);
-                    startActivity(mainIntent);
-                    finish();
-                } else {
-                    Toast.makeText(this, "There's an issue signing up. Please try again.",
-                            Toast.LENGTH_SHORT).show();
-                }
+                RuntimeManager.getInstance().setCurrentUser(newUser);
+                mServerIf.setHandler(mHandler);
+                mServerIf.createUser(newUser);
             }
         });
+    }
+
+    private class CreateAccountHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.arg2) {
+                case MessageConstants.OPERATION_SUCCESS:
+                    Intent mainIntent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(mainIntent);
+                    finish();
+                    break;
+
+                case MessageConstants.OPERATION_FAILURE_UNAUTHORIZED:
+                    Toast.makeText(getApplicationContext(),
+                            MessageConstants.DUPLICATE_USER_ERR_STRING, Toast.LENGTH_SHORT).show();
+                    break;
+
+                default:
+                    Toast.makeText(getApplicationContext(), "There's an issue signing up. Please " +
+                            "try again.", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
     }
 }

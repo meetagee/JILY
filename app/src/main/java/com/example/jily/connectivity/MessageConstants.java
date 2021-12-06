@@ -6,7 +6,6 @@ public interface MessageConstants {
     int MESSAGE_LOGIN_RESPONSE   = 0;
     int MESSAGE_LOGOUT_RESPONSE  = 1;
     int MESSAGE_USER_RESPONSE    = 2;
-    int MESSAGE_PROFILE_RESPONSE = 3;
 
     // Constants defining the HTTP method requested
     int REQUEST_CREATE = 0;
@@ -26,16 +25,10 @@ public interface MessageConstants {
     // Constants defining whether or not a request with the server was successful
     int OPERATION_SUCCESS               = 0;
     int OPERATION_FAILURE_UNAUTHORIZED  = 1;
-    int OPERATION_FAILURE_FORBIDDEN     = 2;
-    int OPERATION_FAILURE_NOT_FOUND     = 3;
-    int OPERATION_FAILURE_UNPROCESSABLE = 4;
-    int OPERATION_FAILURE_SERVER_ERROR  = 5;
+    int OPERATION_FAILURE_NOT_FOUND     = 2;
+    int OPERATION_FAILURE_UNPROCESSABLE = 3;
+    int OPERATION_FAILURE_SERVER_ERROR  = 4;
 
-    // Constants defining which method an audio transfer used
-    int TRANSFER_BY_BLUETOOTH = 0;
-    int TRANSFER_BY_WIFI      = 1;
-
-    // Constant defining the key in a key-value pair representing a signed-in user's email
-    String USERNAME = "Username";
+    String DUPLICATE_USER_ERR_STRING = "The username already exists!";
 }
 
