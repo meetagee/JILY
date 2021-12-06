@@ -39,7 +39,7 @@ const signup_post = async (req, res) => {
     try {
         const user = await User.create({username, password, public_key, type, firebase_token});
         const token = createToken(user._id);
-        res.status(201).json({user: user._id, access_token: token});
+        res.status(201).json({user: user._id, access_token: token, type: user.type});
     } catch (err) {
         const errors = handleErrors(err);
         res.status(400).json({errors});
@@ -52,7 +52,7 @@ const login_post = async (req, res) => {
     try {
         const user = await User.login(username, password, public_key);
         const token = createToken(user._id);
-        res.status(200).json({user: user._id, access_token: token});
+        res.status(200).json({user: user._id, access_token: token, type: user.type});
     } catch (err) {
         console.log(err)
         const errors = handleErrors(err);
@@ -77,11 +77,18 @@ const merchants_get = async (req, res) => {
 };
 
 const user_get = async (req, res) => {
-    const merchant = await User.findById(req.params.id, (err) => {
+    const user = await User.findById(req.params.id).select('username type').catch((err) => {
         console.log(err);
+        res.status(500).json({user: "Internal error has occuered!"});
+    });
+
+    if (!user) {
+        console.log(`User ${req.params.id} not found`);
         res.status(404).json({user: "User not found"});
-    }).select('username type');
-    res.status(200).json({merchant});
+    } else {
+        res.status(200).json({user});
+    }
+
 };
 
 module.exports = {

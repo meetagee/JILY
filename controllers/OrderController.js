@@ -40,7 +40,7 @@ const confirm_order = async (req, res) => {
         res.status(400).json({status: `The order is not waiting for confirmation, it is ${order.status}!`});
     }
 
-    const updated_order = Order.findByIdAndUpdate(order_id, {status: "In Progress"}, (err) => {
+    const updated_order = Order.findByIdAndUpdate(order_id, {status: "In Progress"}).catch((err) => {
         if (err) {
             console.log(err);
             res.status(400).json({status: 'The order could not be marked as in progress!'});
@@ -72,12 +72,12 @@ const mark_order_ready = async (req, res) => {
 	const salt = await bcrypt.genSalt();
     const secret = await bcrypt.hash(generate_secret(order), salt);
 
-    const updated_order = await Order.findByIdAndUpdate(order_id, {status: "Ready For Pickup", secret}, (err) => {
+    const updated_order = await Order.findByIdAndUpdate(order_id, {status: "Ready For Pickup", secret}).catch((err) => {
         if (err) {
             console.log(err);
             res.status(400).json({status: 'The order could not be marked as ready!'});
         }
-    })
+    });
 
     res.status(200).json({order_id: updated_order._id, status: updated_order.status});
 
@@ -138,12 +138,12 @@ const mark_order_completed = async (req, res) => {
         res.status(400).json({secret: 'The secret does not match!'});
     }
 
-    const updated_order = await Order.findByIdAndUpdate(order._id, {$set: { "status": "Completed"}}, (err) => {
-            if (err) {
-                console.log(err)
-                res.status(400).json({status: 'The order could not be marked as completed!'});
-            }
-        });
+    const updated_order = await Order.findByIdAndUpdate(order._id, {$set: { "status": "Completed"}}).catch((err) => {
+        if (err) {
+            console.log(err)
+            res.status(400).json({status: 'The order could not be marked as completed!'});
+        }
+    });
     
     
     res.status(200).json({order_id: updated_order._id, status: updated_order.status});
@@ -169,11 +169,18 @@ const get_orders = async (req, res) => {
 }
 
 const get_order_by_id = async (req, res) => {
-    const order = await Order.findById(req.params.order_id, (err) => {
+    const order = await Order.findById(req.params.order_id).select('-secret').catch((err) => {
         console.log(err);
+        res.status(500).json({order: "Internal error has occuered!"});
+    });
+
+    if (!order) {
+        console.log(`Order ${req.params.order_id} not found!`);
         res.status(404).json({order: "Order not found"});
-    }).select('-secret');
-    res.status(200).json({order});
+    } else {
+        res.status(200).json({order});
+    }
+
 }
 
 module.exports = {
