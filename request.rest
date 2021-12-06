@@ -14,7 +14,7 @@ POST http://localhost:5000/user/login
 Content-Type: application/json
 
 {
-    "username": "yash1",
+    "username": "yash",
     "password": "123456",
     "public_key": "7777"
 }
@@ -68,3 +68,4 @@ access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTcxOWQ0MzkxMTQ3Z
 
 GET http://localhost:5000/user/user/61a719d4391147fd7ff9bd4f
 access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTcxOWQ0MzkxMTQ3ZmQ3ZmY5YmQ0ZSIsImlhdCI6MTYzODc2OTI2NSwiZXhwIjoxNjM5MDI4NDY1fQ.9RS_HIErPCN5WwC72hkQkxQro0EZO6Ky_c7Lb8reKKU
+

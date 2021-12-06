@@ -91,10 +91,28 @@ const user_get = async (req, res) => {
 
 };
 
+const update_user_firebase_token = async (req, res) => {
+    const user = res.locals.user;
+    const {firebase_token} = req.body;
+    if (user) {
+        if (!firebase_token) {
+            res.status(400).json({firebase_token: "No firebase token provided"})
+        }
+        console.log(firebase_token)
+        await User.findByIdAndUpdate(user._id, {
+            firebase_token
+        })
+        res.status(200).json({firebase_token})
+    } else {
+        res.status(500).json({user: "Internal error has occured"})
+    }
+}
+
 module.exports = {
     signup_post,
     login_post,
     logout_get,
     merchants_get,
-    user_get
+    user_get,
+    update_user_firebase_token,
 }
