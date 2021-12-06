@@ -6,7 +6,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.example.jily.model.Id;
 import com.example.jily.model.Jily;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
@@ -89,46 +88,61 @@ public class ServerInterface {
     //----------------------------------------------------------------------------------------------
     // AUTHENTICATION HANDLERS
     //----------------------------------------------------------------------------------------------
-    public void login(String username, String password) {
-        server.login(username, password).enqueue(new Callback<ResponseBody>() {
+    public void login(User user) {
+        server.login(user).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
+                Gson gson = new Gson();
                 if (response.isSuccessful()) {
                     try {
-                        // Save IDs
-                        Gson gson = new Gson();
                         assert response.body() != null;
-                        Id id = gson.fromJson(response.body().string(), Id.class);
-                        userId = id.getUserId();
-                        profileId = id.getProfileId();
+                        User user = gson.fromJson(response.body().string(), User.class);
+                        RuntimeManager.getInstance().getCurrentUser().setAccessToken(user.getAccessToken());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    // Tell user we successfully logged in
-                    Message readMsg = mHandler.obtainMessage(
+                    // Tell user we successfully created their details
+                    readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
-                            0,
+                            MessageConstants.REQUEST_GET,
                             MessageConstants.OPERATION_SUCCESS);
-                    readMsg.sendToTarget();
-                } else if (response.code() == UNAUTHORIZED) {
-                    // Tell user login was not successful
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_LOGIN_RESPONSE,
-                            0,
-                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
                 } else {
-                    // Tell user that no account was associated with those credentials
-                    Message readMsg = mHandler.obtainMessage(
+                    boolean bDoesUserExist = true;
+                    boolean bPasswordIncorrect = false;
+                    try {
+                        assert response.errorBody() != null;
+                        JSONObject responseJson = new JSONObject(response.errorBody().string());
+                        JSONObject err = new JSONObject(responseJson.get("errors").toString());
+                        if (err.get("username").equals(MessageConstants.USERNAME_NOT_REGISTERED)) {
+                            bDoesUserExist = false;
+                        } else if (err.get("password").equals(MessageConstants.PASSWORD_INCORRECT)) {
+                            bPasswordIncorrect = true;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // Tell user we encountered a failure
+                    int messageRetCode = -1;
+                    if (!bDoesUserExist) {
+                        messageRetCode = MessageConstants.OPERATION_FAILURE_NOT_FOUND;
+                    } else if (bPasswordIncorrect) {
+                        messageRetCode = MessageConstants.OPERATION_FAILURE_UNAUTHORIZED;
+                    } else {
+                        messageRetCode = MessageConstants.OPERATION_FAILURE_UNPROCESSABLE;
+                    }
+                    readMsg = mHandler.obtainMessage(
                             MessageConstants.MESSAGE_LOGIN_RESPONSE,
-                            0,
-                            MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
-                    readMsg.sendToTarget();
+                            MessageConstants.REQUEST_CREATE,
+                            messageRetCode);
                 }
+                readMsg.sendToTarget();
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Log.e("Login Error", t.getMessage());
+                Log.e("[ServerInterface] Login", t.getMessage());
             }
         });
     }

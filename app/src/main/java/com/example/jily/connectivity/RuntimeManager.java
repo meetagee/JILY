@@ -19,7 +19,7 @@ public class RuntimeManager {
     public static RuntimeManager getInstance() {
         // Double check locking pattern
         if (mInstance == null) {                     // Check for the first time
-            synchronized (ClientRetrofit.class) {   // Check for the second time
+            synchronized (RuntimeManager.class) {   // Check for the second time
                 // If there is no instance available create a new one
                 if (mInstance == null) mInstance = new RuntimeManager();
             }
