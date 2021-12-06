@@ -10,6 +10,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -37,7 +38,7 @@ public interface ServerEndpoint {
     @Headers("{access_token}")
     @GET("user/user/{user_id}")
     Call<ResponseBody> getUserType(@Path("access_token") String accessToken,
-            @Path("user_id") String userId);
+                                   @Path("user_id") String userId);
 
     @DELETE("users/{user_id}/")
     Call<ResponseBody> deleteUser(@Path("user_id") Integer user_id);
@@ -50,9 +51,8 @@ public interface ServerEndpoint {
     //----------------------------------------------------------------------------------------------
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
-    @GET("merchants/")
-    Call<ResponseBody> getMerchants();
+    @GET("user/merchants")
+    Call<ResponseBody> getMerchants(@Header("access_token") String accessToken);
 
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS

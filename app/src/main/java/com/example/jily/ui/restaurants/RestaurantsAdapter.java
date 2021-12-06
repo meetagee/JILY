@@ -11,14 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.R;
-import com.example.jily.model.Restaurant;
+import com.example.jily.model.User;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.RestaurantsViewHolder> {
 
-    private final ArrayList<Restaurant> restaurants;
+    private final ArrayList<User> restaurants;
     private final Context mContext;
 
     public static class RestaurantsViewHolder extends RecyclerView.ViewHolder {
@@ -36,7 +35,7 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
         }
     }
 
-    public void add(int position, Restaurant item) {
+    public void add(int position, User item) {
         restaurants.add(position, item);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, getItemCount());
@@ -48,7 +47,7 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
         notifyItemRangeChanged(position, getItemCount());
     }
 
-    public RestaurantsAdapter(ArrayList<Restaurant> myDataset, Context context) {
+    public RestaurantsAdapter(ArrayList<User> myDataset, Context context) {
         restaurants = myDataset;
         mContext = context;
     }
@@ -67,8 +66,8 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
     public void onBindViewHolder(RestaurantsViewHolder holder,
                                  @SuppressLint("RecyclerView") final int position) {
         // Replace the contents of the view (invoked by the layout manager)
-        final String name = restaurants.get(position).getName();
-        final String status = restaurants.get(position).getStatus();
+        final String name = restaurants.get(position).getUsername();
+        final String status = "Open";
 
         holder.textRestaurantTitle.setText(name);
         holder.textRestaurantTitle.setOnClickListener(v -> {

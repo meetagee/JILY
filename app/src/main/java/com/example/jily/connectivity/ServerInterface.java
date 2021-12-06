@@ -8,16 +8,15 @@ import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
 import com.example.jily.model.Jily;
+import com.example.jily.model.Restaurant;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.example.jily.utility.DebugConstants;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -354,33 +353,35 @@ public class ServerInterface {
     //----------------------------------------------------------------------------------------------
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
-    public void getMerchants() {
-        server.getMerchants().enqueue(new Callback<ResponseBody>() {
+    public void getMerchants(User user) {
+        server.getMerchants(user.getAccessToken()).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
+                Gson gson = new Gson();
                 if (response.isSuccessful()) {
                     try {
-                        Gson gson = new Gson();
-                        Type fields = new TypeToken<List<Jily<User>>>() {
-                        }.getType();
-                        List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
-                        // Send merchants details
-                        Message readMsg = mHandler.obtainMessage(
-                                MessageConstants.MESSAGE_USER_RESPONSE,
-                                MessageConstants.REQUEST_GET,
-                                MessageConstants.OPERATION_SUCCESS,
-                                user);
+                        assert response.body() != null;
+                        Restaurant merchants = gson.fromJson(response.body().string(), Restaurant.class);
+                        if (merchants.getMerchants().size() > 0) {
+                            // Send merchants details
+                            readMsg = mHandler.obtainMessage(
+                                    MessageConstants.MESSAGE_USER_RESPONSE,
+                                    MessageConstants.REQUEST_GET,
+                                    MessageConstants.OPERATION_SUCCESS,
+                                    merchants);
+                        } else {
+                            // Tell user no merchants were found
+                            readMsg = mHandler.obtainMessage(
+                                    MessageConstants.MESSAGE_USER_RESPONSE,
+                                    MessageConstants.REQUEST_GET,
+                                    MessageConstants.OPERATION_FAILURE_NOT_FOUND,
+                                    merchants);
+                        }
                         readMsg.sendToTarget();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                } else if (response.code() == NOT_FOUND) {
-                    // Tell user the merchants were not found
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_GET,
-                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
                 } else {
                     try {
                         Log.e("Merchants Response", response.errorBody().string());
@@ -392,6 +393,7 @@ public class ServerInterface {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] GetMerchants:", "Failure:" + t.getMessage());
             }
         });
     }

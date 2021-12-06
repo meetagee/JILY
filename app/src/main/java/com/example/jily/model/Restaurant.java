@@ -1,20 +1,25 @@
 package com.example.jily.model;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 public class Restaurant {
 
-    private String name;
-    private String status;
+    @SerializedName("merchants")
+    @Expose
+    private List<User> merchants;
 
-    public Restaurant(String name, String status) {
-        this.name = name;
-        this.status = status;
+    public Restaurant(List<User> merchants) {
+        this.merchants = merchants;
     }
 
-    public String getName() { return name; }
+    public List<User> getMerchants() {
+        return merchants;
+    }
 
-    public void setName(String name) { this.name = name; }
-
-    public String getStatus() { return status; }
-
-    public void setStatus(String date) { this.status = date; }
+    public void setMerchants(List<User> merchants) {
+        this.merchants = merchants;
+    }
 }

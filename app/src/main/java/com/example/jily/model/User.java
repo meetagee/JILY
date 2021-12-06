@@ -14,6 +14,7 @@ public class User {
     public static final String DUMMY_ACCESS_TOKEN = "DUMMY_ACCESS_TOKEN";
     public static final String DUMMY_USER_ID = "DUMMY_USER_ID";
     public static final String DUMMY_USER_TYPE = "DUMMY_USER_TYPE";
+
     @SerializedName("username")
     @Expose
     private String username;
@@ -38,7 +39,8 @@ public class User {
     @SerializedName("access_token")
     @Expose
     private String accessToken;
-    @SerializedName("user")
+
+    @SerializedName(value = "user", alternate = "_id")
     @Expose
     private String userId;
 
