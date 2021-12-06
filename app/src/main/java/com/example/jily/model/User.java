@@ -8,25 +8,32 @@ import com.google.gson.annotations.SerializedName;
 import java.security.PrivateKey;
 
 public class User {
+
     public static final int KEY_SIZE = 2048;
     public static final String DUMMY_FIREBASE_TOKEN = "DUMMY_FIREBASE_TOKEN";
     public static final String DUMMY_ACCESS_TOKEN = "DUMMY_ACCESS_TOKEN";
+
     @SerializedName("username")
     @Expose
     private String username;
+
     @SerializedName("password")
     @Expose
     private String password;
+
     @SerializedName("public_key")
     @Expose
     private String publicKey;
     private PrivateKey privateKey;
+
     @SerializedName("type")
     @Expose
     private String userType;
+
     @SerializedName("firebase_token")
     @Expose
     private String firebaseToken;
+
     @SerializedName("access_token")
     @Expose
     private String accessToken;

@@ -49,6 +49,8 @@ public interface ServerEndpoint {
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
+    @GET("merchants/")
+    Call<ResponseBody> getMerchants();
 
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS

@@ -26,7 +26,7 @@ import retrofit2.Response;
 public class ServerInterface {
 
     // Placeholder for server address:port pair to connect to backend
-    private static final String DEBUG_IP = "192.168.10.102";
+    private static final String DEBUG_IP = "192.168.0.12";
     private static final String DEBUG_PORT = "5000";
     private static final String BASE_URL = "http://" + DEBUG_IP + ":" + DEBUG_PORT + "/";
     private static volatile ServerInterface instance;
@@ -345,10 +345,49 @@ public class ServerInterface {
     // RESTAURANT HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
+    public void getMerchants() {
+        server.getMerchants().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        Gson gson = new Gson();
+                        Type fields = new TypeToken<List<Jily<User>>>() {
+                        }.getType();
+                        List<Jily<User>> user = gson.fromJson(response.body().string(), fields);
+                        // Send merchants details
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_USER_RESPONSE,
+                                MessageConstants.REQUEST_GET,
+                                MessageConstants.OPERATION_SUCCESS,
+                                user);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == NOT_FOUND) {
+                    // Tell user the merchants were not found
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_USER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
+                } else {
+                    try {
+                        Log.e("Merchants Response", response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            }
+        });
+    }
 
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
 }
-
