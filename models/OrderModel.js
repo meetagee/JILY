@@ -3,11 +3,11 @@ const crypto = require("crypto");
 
 const OrderSchema = new mongoose.Schema({
     customer_id: {
-        type: Number,
+        type: String,
         required: true
     },
     merchant_id: {
-        type: Number,
+        type: String,
         required: true
     },
     items: {
