@@ -6,9 +6,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.jily.BuildConfig;
 import com.example.jily.model.Jily;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
+import com.example.jily.utility.DebugConstants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -26,9 +28,8 @@ import retrofit2.Response;
 public class ServerInterface {
 
     // Placeholder for server address:port pair to connect to backend
-    private static final String DEBUG_IP = "192.168.0.12";
-    private static final String DEBUG_PORT = "5000";
-    private static final String BASE_URL = "http://" + DEBUG_IP + ":" + DEBUG_PORT + "/";
+    private static final String SERVER_IP = "<YOUR IP HERE>";
+    private static final String SERVER_PORT = "5000";
     private static volatile ServerInterface instance;
     private final int UNAUTHORIZED = 401;
     private final int FORBIDDEN = 403;
@@ -60,7 +61,15 @@ public class ServerInterface {
     }
 
     private static ServerEndpoint getServerEndpoint() {
-        ClientRetrofit.init(BASE_URL);
+        String baseUrl = "http://";
+        if (BuildConfig.BUILD_TYPE.equals("debug")) {
+            baseUrl += DebugConstants.SERVER_IP;
+        }
+        else {
+            baseUrl += SERVER_IP;
+        }
+        baseUrl += (":" + SERVER_PORT + "/");
+        ClientRetrofit.init(baseUrl);
         return ClientRetrofit.getInstance().createAdapter().create(ServerEndpoint.class);
     }
 
