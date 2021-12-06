@@ -48,6 +48,12 @@ const confirm_order = async (req, res) => {
         }
     });
 
+    try {
+        notifyUser(order.customer_id, `Your order ${order_id} has been confirmed.`);
+    } catch (err) {
+        console.log("Error sending confimed order notifiation!" ,err);
+    }
+
     res.status(200).json({order_id: updated_order._id, status: updated_order.status});
 
 }
@@ -78,6 +84,12 @@ const mark_order_ready = async (req, res) => {
             res.status(400).json({status: 'The order could not be marked as ready!'});
         }
     });
+
+    try {
+        notifyUser(order.customer_id, `Your order ${order_id} is ready for pickup.`);
+    } catch (err) {
+        console.log("Error sending pick up order notifiation!" ,err);
+    }
 
     res.status(200).json({order_id: updated_order._id, status: updated_order.status});
 
@@ -145,7 +157,13 @@ const mark_order_completed = async (req, res) => {
         }
     });
     
-    
+    try {
+        notifyUser(order.customer_id, `Your order ${order_id} has been completed.`);
+        notifyUser(order.merchant_id, `Your order ${order_id} has been completed.`);
+    } catch (err) {
+        console.log("Error sending completed order notifiation!" ,err);
+    }
+
     res.status(200).json({order_id: updated_order._id, status: updated_order.status});
 
 }
@@ -154,11 +172,14 @@ const create_order = async (req, res) => {
     const {user_id, merchant_id, items} = req.body;
     try {
         const order = await Order.create({customer_id: user_id, merchant_id, items});
+        notifyUser(order.customer_id, `Your order ${order._id} has been created.`);
+        notifyUser(order.merchant_id, `New order: ${order._id}. Please confirm. `);
         res.status(201).json({order_id: order._id, status: order.status});
     } catch (err) {
         console.log(err)
         res.status(400).json({status: 'The order could not be created!'});
     }
+
 }
 
 const get_orders = async (req, res) => {
