@@ -5,8 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -27,9 +25,9 @@ import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.User;
 import com.example.jily.model.User.UserType;
+import com.example.jily.utility.KeysManager;
 
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -142,24 +140,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please select an user type",
                         Toast.LENGTH_SHORT).show();
             } else {
-                KeyPairGenerator keyPairGen;
-                try {
-                    keyPairGen = KeyPairGenerator.getInstance(
-                            KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-                    keyPairGen.initialize(new KeyGenParameterSpec.Builder(
-                            username,
-                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
-                                    | KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                            .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
-                            .setKeySize(User.KEY_SIZE)
-                            .build());
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "Failed to initialize keys",
-                            Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                    return;
-                }
-                KeyPair signupKeyPair = keyPairGen.generateKeyPair();
+                KeyPair signupKeyPair = KeysManager.getInstance().getKeyPair(username);
                 PublicKey signUpPubKey = signupKeyPair.getPublic();
                 PrivateKey signUpPrivateKey = signupKeyPair.getPrivate();
 

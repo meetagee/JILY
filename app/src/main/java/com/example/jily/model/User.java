@@ -34,7 +34,7 @@ public class User {
     public User(String username,
                 String password,
                 String publicKey,
-                String userType,
+                @Nullable String userType,
                 String firebaseToken,
                 String accessToken) {
         this.username = username;

@@ -30,5 +30,7 @@ public interface MessageConstants {
     int OPERATION_FAILURE_SERVER_ERROR  = 4;
 
     String DUPLICATE_USER_ERR_STRING = "The username already exists!";
+    String USERNAME_NOT_REGISTERED = "The username has not been registered!";
+    String PASSWORD_INCORRECT = "The password is incorrect!";
 }
 
