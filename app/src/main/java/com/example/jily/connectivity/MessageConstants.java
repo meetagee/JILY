@@ -6,7 +6,7 @@ public interface MessageConstants {
     int MESSAGE_LOGIN_RESPONSE      = 0;
     int MESSAGE_LOGOUT_RESPONSE     = 1;
     int MESSAGE_USER_RESPONSE       = 2;
-    int MESSAGE_RESTAURANT_RESPONSE = 3;
+    int MESSAGE_MERCHANT_RESPONSE = 3;
     int MESSAGE_ORDER_RESPONSE      = 4;
 
     // Constants defining the HTTP method requested

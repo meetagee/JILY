@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Restaurant {
+public class Merchants {
 
     @SerializedName("merchants")
     @Expose
     private List<User> merchants;
 
-    public Restaurant(List<User> merchants) {
+    public Merchants(List<User> merchants) {
         this.merchants = merchants;
     }
 

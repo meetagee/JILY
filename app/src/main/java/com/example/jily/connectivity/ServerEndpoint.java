@@ -37,7 +37,7 @@ public interface ServerEndpoint {
                                    @Path("user_id") String userId);
 
     //----------------------------------------------------------------------------------------------
-    // RESTAURANT HANDLERS
+    // MERCHANT HANDLERS
     //----------------------------------------------------------------------------------------------
     @GET("user/merchants")
     Call<ResponseBody> getMerchants(@Header("access_token") String accessToken);
