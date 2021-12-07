@@ -1,6 +1,5 @@
 package com.example.jily.connectivity;
 
-import com.example.jily.model.Order;
 import com.example.jily.model.User;
 
 import okhttp3.ResponseBody;
@@ -37,20 +36,9 @@ public interface ServerEndpoint {
                                    @Path("user_id") String userId);
 
     //----------------------------------------------------------------------------------------------
-    // MERCHANT HANDLERS
-    //----------------------------------------------------------------------------------------------
-    @GET("user/merchants")
-    Call<ResponseBody> getMerchants(@Header("access_token") String accessToken);
-
-    //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
-    @Headers("Content-Type:application/json")
-    @POST("order/new-order")
-    Call<ResponseBody> createOrder(@Header("access_token") String accessToken,
-                                   @Body Order order);
-
     @GET("order/get-orders/{merchant_id}")
     Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
                                  @Path("merchant_id") String userId);

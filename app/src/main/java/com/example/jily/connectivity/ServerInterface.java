@@ -7,8 +7,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
-import com.example.jily.model.Order;
-import com.example.jily.model.Merchants;
 import com.example.jily.model.Orders;
 import com.example.jily.model.User;
 import com.example.jily.utility.DebugConstants;
@@ -291,93 +289,9 @@ public class ServerInterface {
     }
 
     //----------------------------------------------------------------------------------------------
-    // MERCHANT HANDLERS
-    //----------------------------------------------------------------------------------------------
-    public void getMerchants(User user) {
-        server.getMerchants(user.getAccessToken()).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        assert response.body() != null;
-                        Gson gson = new Gson();
-                        Merchants merchants = gson.fromJson(response.body().string(), Merchants.class);
-                        if (merchants.getMerchants().size() > 0) {
-                            // Send merchants' details; a default message is already set up when
-                            // there are no merchants as no explicit error is provided by the server
-                            Message readMsg = mHandler.obtainMessage(
-                                    MessageConstants.MESSAGE_MERCHANT_RESPONSE,
-                                    MessageConstants.REQUEST_GET,
-                                    MessageConstants.OPERATION_SUCCESS,
-                                    merchants);
-                            readMsg.sendToTarget();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        assert response.errorBody() != null;
-                        Log.e("[ServerInterface] GetMerchants", "Response:" + response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("[ServerInterface] GetMerchants", "Failure:" + t.getMessage());
-            }
-        });
-    }
-
-    //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
-    public void createOrder(User user, Order order) {
-        server.createOrder(user.getAccessToken(), order).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        assert response.body() != null;
-                        Gson gson = new Gson();
-                        Order order = gson.fromJson(response.body().string(), Order.class);
-                        // Create a new order
-                        Message readMsg = mHandler.obtainMessage(
-                                MessageConstants.MESSAGE_ORDER_RESPONSE,
-                                MessageConstants.REQUEST_CREATE,
-                                MessageConstants.OPERATION_SUCCESS,
-                                order);
-                        readMsg.sendToTarget();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (response.code() == BAD_REQUEST) {
-                    // Tell user their order was not created properly
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_ORDER_RESPONSE,
-                            MessageConstants.REQUEST_CREATE,
-                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
-                } else {
-                    try {
-                        assert response.errorBody() != null;
-                        Log.e("[ServerInterface] CreateOrder", "Response:" + response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("[ServerInterface] CreateOrder", "Failure:" + t.getMessage());
-            }
-        });
-    }
-
     public void getOrders(User user) {
         server.getOrders(user.getAccessToken(), user.getUserId()).enqueue(new Callback<ResponseBody>() {
             @Override
