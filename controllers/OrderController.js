@@ -33,7 +33,7 @@ const confirm_order = async (req, res) => {
         return;
     }
 
-    if (!(order.merchant_id === user._id)) {
+    if (!(order.merchant_id === user._id.toString())) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
         return;
     }
@@ -71,7 +71,7 @@ const mark_order_ready = async (req, res) => {
         return;
     }
 
-    if (!(order.merchant_id === user._id)) {
+    if (!(order.merchant_id === user._id.toString())) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
         return;
     }
@@ -118,7 +118,7 @@ const get_order_secret = async (req, res) => {
         return;
     }
 
-    if (!(order.customer_id === user._id)) {
+    if (!(order.customer_id === user._id.toString())) {
         res.status(401).json({merchant: `Customer cannot get qr code for order ${order_id}!`});
         return;
     }
@@ -151,7 +151,7 @@ const mark_order_completed = async (req, res) => {
         return;
     }
 
-    if (!(order.merchant_id === user._id)) {
+    if (!(order.merchant_id === user._id.toString())) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
         return;
     }
