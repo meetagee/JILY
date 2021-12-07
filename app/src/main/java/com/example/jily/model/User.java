@@ -39,6 +39,9 @@ public class User {
     @SerializedName("access_token")
     @Expose
     private String accessToken;
+    @SerializedName("user")
+    @Expose
+    private String userId;
 
     @SerializedName(value = "user", alternate = "_id")
     @Expose

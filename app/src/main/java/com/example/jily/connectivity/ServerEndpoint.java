@@ -51,4 +51,3 @@ public interface ServerEndpoint {
     Call<ResponseBody> createOrder(@Header("access_token") String accessToken,
                                    @Body Order order);
 }
-

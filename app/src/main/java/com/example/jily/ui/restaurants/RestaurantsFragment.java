@@ -1,8 +1,6 @@
 package com.example.jily.ui.restaurants;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.databinding.FragmentRestaurantsBinding;
-import com.example.jily.model.Restaurant;
-import com.example.jily.model.User;
-
-import java.util.ArrayList;
 
 public class RestaurantsFragment extends Fragment {
 

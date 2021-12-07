@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.jily.CreateAccountActivity;
 import com.example.jily.WelcomeActivity;
 import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;

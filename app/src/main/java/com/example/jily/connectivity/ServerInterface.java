@@ -108,6 +108,7 @@ public class ServerInterface {
                         User currentUser = RuntimeManager.getInstance().getCurrentUser();
                         currentUser.setAccessToken(recvUser.getAccessToken());
                         currentUser.setUserId(recvUser.getUserId());
+                        currentUser.setUserType(recvUser.getUserType());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -147,11 +148,17 @@ public class ServerInterface {
                             messageRetCode);
                 }
                 readMsg.sendToTarget();
+
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] Login", t.getMessage());
+                Message readMsg = mHandler.obtainMessage(
+                        MessageConstants.MESSAGE_LOGIN_RESPONSE,
+                        MessageConstants.REQUEST_CREATE,
+                        MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
+                readMsg.sendToTarget();
             }
         });
     }
