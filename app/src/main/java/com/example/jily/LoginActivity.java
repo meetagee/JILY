@@ -76,9 +76,10 @@ public class LoginActivity extends AppCompatActivity {
                 User loginUser = new User(username,
                         password,
                         Base64.getEncoder().encodeToString(signUpPubKey.getEncoded()),
-                        null,
+                        User.DUMMY_USER_TYPE,
                         User.DUMMY_FIREBASE_TOKEN,
-                        User.DUMMY_ACCESS_TOKEN);
+                        User.DUMMY_ACCESS_TOKEN,
+                        User.DUMMY_USER_ID);
                 loginUser.setPrivateKey(signUpPrivateKey);
 
                 RuntimeManager.getInstance().setCurrentUser(loginUser);

@@ -12,7 +12,8 @@ public class User {
     public static final int KEY_SIZE = 2048;
     public static final String DUMMY_FIREBASE_TOKEN = "DUMMY_FIREBASE_TOKEN";
     public static final String DUMMY_ACCESS_TOKEN = "DUMMY_ACCESS_TOKEN";
-
+    public static final String DUMMY_USER_ID = "DUMMY_USER_ID";
+    public static final String DUMMY_USER_TYPE = "DUMMY_USER_TYPE";
     @SerializedName("username")
     @Expose
     private String username;
@@ -37,19 +38,24 @@ public class User {
     @SerializedName("access_token")
     @Expose
     private String accessToken;
+    @SerializedName("user")
+    @Expose
+    private String userId;
 
     public User(String username,
                 String password,
                 String publicKey,
-                @Nullable String userType,
+                String userType,
                 String firebaseToken,
-                String accessToken) {
+                String accessToken,
+                @Nullable String userId) {
         this.username = username;
         this.password = password;
         this.publicKey = publicKey;
         this.userType = userType;
         this.firebaseToken = firebaseToken;
         this.accessToken = accessToken;
+        this.userId = userId;
     }
 
     public User(User that) {
@@ -58,11 +64,16 @@ public class User {
                 that.getPublicKey(),
                 that.getUserType(),
                 that.getFirebaseToken(),
-                that.getAccessToken());
+                that.getAccessToken(),
+                that.getUserId());
     }
 
     public User() {
 
+    }
+
+    public void clearCurrentUser() throws Throwable {
+        this.finalize();
     }
 
     public String getUsername() {
@@ -119,6 +130,14 @@ public class User {
 
     public void setPrivateKey(PrivateKey privateKey) {
         this.privateKey = privateKey;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public enum UserType {
