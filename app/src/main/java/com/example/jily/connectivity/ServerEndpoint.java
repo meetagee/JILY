@@ -54,4 +54,8 @@ public interface ServerEndpoint {
     @GET("order/get-orders/{merchant_id}")
     Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
                                  @Path("merchant_id") String userId);
+
+    @GET("order/get-order-secret/{order_id}")
+    Call<ResponseBody> getOrderSecret(@Header("access_token") String accessToken,
+                                      @Path("order_id") String orderId);
 }

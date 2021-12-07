@@ -25,6 +25,10 @@ public class Order {
     @Expose
     private String status;
 
+    @SerializedName("secret")
+    @Expose
+    private String secret; // Base64 string
+
     @SerializedName("items")
     @Expose
     private List<String> items;
@@ -33,11 +37,13 @@ public class Order {
                  String merchantId,
                  @Nullable String orderId,
                  @Nullable String status,
+                 @Nullable String secret,
                  List<String> items) {
         this.userId = userId;
         this.merchantId = merchantId;
         this.orderId = orderId;
         this.status = status;
+        this.secret = secret;
         this.items = items;
     }
 
@@ -55,7 +61,11 @@ public class Order {
 
     public String getStatus() { return status; }
 
-    public void setStatus(String date) { this.status = date; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getSecret() { return secret; }
+
+    public void setSecret(String secret) { this.secret = secret; }
 
     public List<String> getItems() { return items; }
 

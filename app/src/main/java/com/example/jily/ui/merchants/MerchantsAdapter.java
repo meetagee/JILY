@@ -19,6 +19,7 @@ import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
+import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 
 import java.util.ArrayList;
@@ -122,25 +123,28 @@ public class MerchantsAdapter extends RecyclerView.Adapter<MerchantsAdapter.Merc
     }
 
     private void createOrder(int position, ArrayList<Integer> selection) {
-        // Retrieve the list of selected items from the menu
-        String[] menu = mContext.getResources().getStringArray(R.array.menu);
-        List<String> items = new ArrayList<>();
+        if (selection.size() > 0) {
+            // Retrieve the list of selected items from the menu
+            String[] menu = mContext.getResources().getStringArray(R.array.menu);
+            List<String> items = new ArrayList<>();
 
-        for (int i = 0; i < selection.size(); i++) {
-            items.add(menu[selection.get(i)]);
+            for (int i = 0; i < selection.size(); i++) {
+                items.add(menu[selection.get(i)]);
+            }
+
+            // Create a new order
+            User currentUser = RuntimeManager.getInstance().getCurrentUser();
+            Order order = new Order(
+                    currentUser.getUserId(),
+                    merchants.get(position).getUserId(),
+                    null, null, null,
+                    items);
+            mServerIf.setHandler(mHandler);
+            mServerIf.createOrder(currentUser, order);
+        } else {
+            Toast.makeText(mContext.getApplicationContext(),
+                    "You need to select at least one item", Toast.LENGTH_SHORT).show();
         }
-
-        // Create a new order
-        User currentUser = RuntimeManager.getInstance().getCurrentUser();
-        Order order = new Order(
-                currentUser.getUserId(),
-                merchants.get(position).getUserId(),
-                null,
-                null,
-                items);
-
-        mServerIf.setHandler(mHandler);
-        mServerIf.createOrder(currentUser, order);
     }
 
     private class MerchantsHandler extends Handler {
@@ -148,12 +152,14 @@ public class MerchantsAdapter extends RecyclerView.Adapter<MerchantsAdapter.Merc
         public void handleMessage(Message msg) {
             switch (msg.arg2) {
                 case MessageConstants.OPERATION_SUCCESS:
-                    // Orders are retrieved when user navigates to Orders fragment
+                    Toast.makeText(mContext.getApplicationContext(), "Your order has been sent",
+                            Toast.LENGTH_SHORT).show();
                     break;
+
                 case MessageConstants.OPERATION_FAILURE_BAD_REQUEST:
-                    String error = (String) msg.obj;
-                    Toast.makeText(mContext.getApplicationContext(), error, Toast.LENGTH_SHORT)
-                            .show();
+                    StdResponse error = (StdResponse) msg.obj;
+                    Toast.makeText(mContext.getApplicationContext(), error.getStatusErr(),
+                            Toast.LENGTH_SHORT).show();
                     break;
 
                 default:
