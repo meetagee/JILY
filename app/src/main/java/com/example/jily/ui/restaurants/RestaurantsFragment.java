@@ -1,7 +1,6 @@
 package com.example.jily.ui.restaurants;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +15,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.databinding.FragmentRestaurantsBinding;
 
-import java.util.Objects;
-
 public class RestaurantsFragment extends Fragment {
 
     private RestaurantsViewModel restaurantsViewModel;
     private FragmentRestaurantsBinding binding;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                // Customize back button press (?)
+            }
+        };
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {

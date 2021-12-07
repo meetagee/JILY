@@ -16,13 +16,8 @@ public class OrdersViewModel extends ViewModel {
     public OrdersViewModel() {
         mText = new MutableLiveData<>();
 
-        // TODO: Perform a GET request and populate orders with server's response
         ArrayList<Order> orders = new ArrayList<>();
-        for (int i = 1; i < 4; i++) {
-            Order order = new Order("Order " + i, "Ready for pickup");
-            orders.add(order);
-        }
-
+        // TODO: Perform a GET request and populate orders with server's response
         mList = new MutableLiveData<>(orders);
         if (orders.size() > 0) {
             mText.setValue("");

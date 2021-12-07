@@ -74,7 +74,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     public void onBindViewHolder(OrdersViewHolder holder,
                                  @SuppressLint("RecyclerView") final int position) {
         // Replace the contents of the view (invoked by the layout manager)
-        final String name = orders.get(position).getName();
+        final String name = "Order " + position;
         final String status = orders.get(position).getStatus();
 
         holder.textOrderTitle.setText(name);
@@ -82,7 +82,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             // Inflate a dialog with a QR code of the encrypted message
             LayoutInflater inflater = LayoutInflater.from(mContext);
             View view = inflater.inflate(
-                    R.layout.view_qr_code, (ViewGroup) v.getParent(), false);
+                    R.layout.dialog_qr_code, (ViewGroup) v.getParent(), false);
             initDialog(view, name);
         });
 
@@ -104,13 +104,10 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         containerQrCode.setImageBitmap(generateQrCode(message));
 
         // Create a dialog to display the QR code to the user
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
+        AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
                 .setView(v)
                 .setTitle("Your confirmation QR code")
                 .setPositiveButton("Close", null).create();
-
-        dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(mContext.getResources().getColor(R.color.primary)));
 
         dialog.show();
     }
