@@ -1,7 +1,5 @@
 package com.example.jily.model;
 
-import androidx.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +7,7 @@ import java.util.List;
 
 public class Order {
 
-    @SerializedName("user_id")
+    @SerializedName(value = "user_id", alternate = "customer_id")
     @Expose
     private String userId;
 
@@ -35,9 +33,9 @@ public class Order {
 
     public Order(String userId,
                  String merchantId,
-                 @Nullable String orderId,
-                 @Nullable String status,
-                 @Nullable String secret,
+                 String orderId,
+                 String status,
+                 String secret,
                  List<String> items) {
         this.userId = userId;
         this.merchantId = merchantId;

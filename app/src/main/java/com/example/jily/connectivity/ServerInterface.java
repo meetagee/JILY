@@ -427,12 +427,12 @@ public class ServerInterface {
                     try {
                         assert response.body() != null;
                         Gson gson = new Gson();
-                        Orders orders = gson.fromJson(response.body().string(), Orders.class);
+                        Order order = gson.fromJson(response.body().string(), Order.class);
                         Message readMsg = mHandler.obtainMessage(
                                 MessageConstants.MESSAGE_ORDER_RESPONSE,
                                 MessageConstants.REQUEST_GET,
                                 MessageConstants.OPERATION_SUCCESS,
-                                orders);
+                                order);
                         readMsg.sendToTarget();
                     } catch (IOException e) {
                         e.printStackTrace();
