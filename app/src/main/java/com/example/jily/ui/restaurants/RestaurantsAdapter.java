@@ -2,7 +2,6 @@ package com.example.jily.ui.restaurants;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -23,7 +22,6 @@ import com.example.jily.model.Order;
 import com.example.jily.model.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.RestaurantsViewHolder> {
