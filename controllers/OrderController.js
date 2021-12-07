@@ -43,7 +43,7 @@ const confirm_order = async (req, res) => {
         return;
     }
 
-    const updated_order = Order.findByIdAndUpdate(order_id, {status: "In Progress"}).catch((err) => {
+    const updated_order = await Order.findByIdAndUpdate(order_id, {status: "In Progress"}).catch((err) => {
         if (err) {
             console.log(err);
             res.status(400).json({status: 'The order could not be marked as in progress!'});
