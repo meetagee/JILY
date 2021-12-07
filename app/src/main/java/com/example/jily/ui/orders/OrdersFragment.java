@@ -4,7 +4,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -13,6 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.databinding.FragmentOrdersBinding;
+import com.google.zxing.integration.android.IntentIntegrator;
+
+import java.util.List;
 
 public class OrdersFragment extends Fragment {
 
@@ -37,6 +44,21 @@ public class OrdersFragment extends Fragment {
         ordersViewModel.getList().observe(getViewLifecycleOwner(), inList ->
                 recyclerView.setAdapter(new OrdersAdapter(inList, getContext())));
 
+        final Button button = binding.buttonScanQr;
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IntentIntegrator integrator = new IntentIntegrator(getActivity());
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                integrator.setPrompt("Scan");
+                integrator.setCameraId(0);
+                integrator.setBeepEnabled(false);
+                integrator.setBarcodeImageEnabled(false);
+                integrator.initiateScan();
+                Toast.makeText(getActivity(), "Order verified", Toast.LENGTH_LONG).show();
+            }
+        });
+      
         return root;
     }
 

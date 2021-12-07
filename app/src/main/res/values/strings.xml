@@ -6,6 +6,7 @@
     <string name="button_logout">Sign out</string>
     <string name="button_signup">Sign up</string>
     <string name="button_start">Start</string>
+    <string name="button_scan_qr">Scan QR code</string>
     <string name="button_text_login">Log in here.</string>
     <string name="menu_merchants">Merchants</string>
     <string name="menu_orders">Orders</string>
