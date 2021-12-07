@@ -38,12 +38,12 @@
         app:layout_constraintVertical_bias="0.143" />
 
     <EditText
-        android:id="@+id/edit_text_email_login"
+        android:id="@+id/edit_text_username_login"
         android:layout_width="@dimen/width_max"
         android:layout_height="wrap_content"
         android:ems="20"
         android:fontFamily="sans-serif-medium"
-        android:hint="@string/text_email"
+        android:hint="@string/text_username"
         android:inputType="textEmailAddress"
         android:textColor="@color/primary"
         android:textColorHint="@color/primary"
@@ -73,7 +73,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_text_email_login"
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_username_login"
         app:layout_constraintVertical_bias="0.046"
         android:importantForAutofill="no" />
 

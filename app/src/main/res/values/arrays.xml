@@ -1,0 +1,7 @@
+<resources>
+    <string-array name="menu">
+        <item>Veggie bowl</item>
+        <item>Veggie drink</item>
+        <item>Veggie salad</item>
+    </string-array>>
+</resources>

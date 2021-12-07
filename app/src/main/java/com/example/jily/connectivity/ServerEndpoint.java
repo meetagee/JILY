@@ -1,78 +1,57 @@
 package com.example.jily.connectivity;
 
-import com.example.jily.model.Profile;
-import com.example.jily.model.Jily;
+import com.example.jily.model.Order;
 import com.example.jily.model.User;
-
-import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
-import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ServerEndpoint {
 
     //----------------------------------------------------------------------------------------------
-    // AUTHENTICATION HANDLERS (TODO: Placeholders for now)
-    //----------------------------------------------------------------------------------------------
-    @POST("login/")
-    @FormUrlEncoded
-    Call<ResponseBody> login(@Field("username") String user,
-                             @Field("password") String password);
-
-    @GET("logout/")
-    Call<ResponseBody> logout();
-
-    //----------------------------------------------------------------------------------------------
-    // USER HANDLERS (TODO: Placeholders for now)
+    // AUTHENTICATION HANDLERS
     //----------------------------------------------------------------------------------------------
     @Headers("Content-Type:application/json")
-    @POST("users/")
-    Call<ResponseBody> createUser(@Body List<Jily<User>> user);
+    @POST("user/login")
+    Call<ResponseBody> login(@Body User user);
 
-    @DELETE("users/{user_id}/")
-    Call<ResponseBody> deleteUser(@Path("user_id") Integer user_id);
+    @GET("user/logout/{user_id}")
+    Call<ResponseBody> logout(@Path("user_id") String userId);
 
-    @GET("users/{user_id}/")
-    Call<ResponseBody> getUser(@Path("user_id") Integer user_id);
-
-    @GET("users/{user_id}/profile/")
-    Call<Integer> getUserProfile(@Path("user_id") Integer user_id);
-
+    //----------------------------------------------------------------------------------------------
+    // USER HANDLERS
+    //----------------------------------------------------------------------------------------------
     @Headers("Content-Type:application/json")
-    @PUT("users/{user_id}/")
-    Call<ResponseBody> updateUser(@Path("user_id") Integer user_id,
-                                  @Body List<Jily<User>> user);
+    @POST("user/signup")
+    Call<ResponseBody> createUser(@Body User user);
+
+    @Headers("{access_token}")
+    @GET("user/user/{user_id}")
+    Call<ResponseBody> getUserType(@Path("access_token") String accessToken,
+                                   @Path("user_id") String userId);
 
     //----------------------------------------------------------------------------------------------
-    // PROFILE HANDLERS (TODO: Placeholders for now)
+    // MERCHANT HANDLERS
     //----------------------------------------------------------------------------------------------
-    @GET("profiles/{profile_id}")
-    Call<ResponseBody> getProfile(@Path("profile_id") Integer profile_id);
-
-    @Headers("Content-Type:application/json")
-    @PUT("profiles/{profile_id}/")
-    Call<ResponseBody> updateProfile(@Path("profile_id") Integer profile_id,
-                                     @Body List<Jily<Profile>> profile);
-
-    //----------------------------------------------------------------------------------------------
-    // RESTAURANT HANDLERS
-    //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
-    @GET("merchants/")
-    Call<ResponseBody> getMerchants();
+    @GET("user/merchants")
+    Call<ResponseBody> getMerchants(@Header("access_token") String accessToken);
 
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
     // TODO: Specify endpoints
-}
+    @Headers("Content-Type:application/json")
+    @POST("order/new-order")
+    Call<ResponseBody> createOrder(@Header("access_token") String accessToken,
+                                   @Body Order order);
 
+    @GET("order/get-orders/{merchant_id}")
+    Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
+                                 @Path("merchant_id") String userId);
+}
