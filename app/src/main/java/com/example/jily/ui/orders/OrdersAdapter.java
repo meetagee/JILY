@@ -2,24 +2,25 @@ package com.example.jily.ui.orders;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.R;
+import com.example.jily.connectivity.MessageConstants;
+import com.example.jily.connectivity.RuntimeManager;
+import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import com.example.jily.model.StdResponse;
+import com.example.jily.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
     private final List<Order> orders;
     private final Context mContext;
+
+    private ServerInterface mServerIf;
+    private Handler mHandler;
 
     public static class OrdersViewHolder extends RecyclerView.ViewHolder {
 
@@ -59,6 +63,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     public OrdersAdapter(ArrayList<Order> myDataset, Context context) {
         orders = myDataset;
         mContext = context;
+
+        mServerIf = ServerInterface.getInstance();
+        mHandler = new OrdersHandler();
     }
 
     @NonNull
@@ -74,17 +81,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     public void onBindViewHolder(OrdersViewHolder holder,
                                  @SuppressLint("RecyclerView") final int position) {
         // Replace the contents of the view (invoked by the layout manager)
-        final String name = "Order " + position;
+        final String name = "Order " + orders.get(position).getOrderId();
         final String status = orders.get(position).getStatus();
 
         holder.textOrderTitle.setText(name);
-        holder.textOrderTitle.setOnClickListener(v -> {
-            // Inflate a dialog with a QR code of the encrypted message
-            LayoutInflater inflater = LayoutInflater.from(mContext);
-            View view = inflater.inflate(
-                    R.layout.dialog_qr_code, (ViewGroup) v.getParent(), false);
-            initDialog(view, name);
-        });
+        holder.textOrderTitle.setOnClickListener(v -> initDialog(position));
 
         holder.textOrderStatus.setText(status);
     }
@@ -96,35 +97,95 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     }
 
     //----------------------------------------------------------------------------------------------
-    // QR CODE HANDLERS
+    // CONFIRMATION HANDLERS
     //----------------------------------------------------------------------------------------------
-    private void initDialog(@NonNull View v, String message) {
-        // Generate a QR code and set it as the contents of the image view
-        ImageView containerQrCode = v.findViewById(R.id.container_qr_code);
-        containerQrCode.setImageBitmap(generateQrCode(message));
-
-        // Create a dialog to display the QR code to the user
+    private void initDialog(int position) {
+        // Create a dialog to prompt the merchant to update the order status
         AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
-                .setView(v)
-                .setTitle("Your confirmation QR code")
-                .setPositiveButton("Close", null).create();
+                .setTitle("Update order status")
+                .setSingleChoiceItems(R.array.status, 0, null)
+                .setPositiveButton("Confirm", (dialog1, which) -> {
+                    int pickup = ((AlertDialog) dialog1).getListView().getCheckedItemPosition();
+                    updateOrder(position, pickup);
+                })
+                .setNegativeButton("Cancel", null).create();
+
+        dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(mContext.getResources().getColor(R.color.primary_dark)));
 
         dialog.show();
     }
 
-    private Bitmap generateQrCode(String status) {
-        MultiFormatWriter writer = new MultiFormatWriter();
-        Bitmap bitmap = null;
-        int dimen = 650;
+    private void updateOrder(int position, int pickup) {
+        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+        mServerIf.setHandler(mHandler);
 
-        try {
-            BitMatrix matrix = writer.encode(status, BarcodeFormat.QR_CODE, dimen, dimen);
-            BarcodeEncoder encoder = new BarcodeEncoder();
-            bitmap = encoder.createBitmap(matrix);
-        } catch (WriterException e) {
-            e.printStackTrace();
+        if (pickup == 1) {
+            mServerIf.readyOrder(currentUser, orders.get(position));
+        } else {
+            mServerIf.confirmOrder(currentUser, orders.get(position));
+        }
+    }
+
+    private String refreshOrder(Order order) {
+        int i;
+        for (i = 0; i < orders.size(); i++) {
+            if (orders.get(i).getOrderId().equals(order.getOrderId())) {
+                // Update the order status
+                String status = order.getStatus();
+                if (status.equals(MessageConstants.STATUS_CONFIRM)) {
+                    orders.get(i).setStatus(MessageConstants.STATUS_PROGRESS);
+                } else if (status.equals(MessageConstants.STATUS_PROGRESS)) {
+                    orders.get(i).setStatus(MessageConstants.STATUS_READY);
+                }
+
+                // Notify the current view that the order has been updated
+                // TODO: May need to send explicit notification too once integrated with Firebase
+                notifyItemRemoved(i);
+                notifyItemInserted(i);
+                break;
+            }
         }
 
-        return bitmap;
+        return orders.get(i).getStatus();
+    }
+
+    private class OrdersHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            StdResponse error;
+            switch (msg.arg2) {
+                case MessageConstants.OPERATION_SUCCESS:
+                    Order order = (Order) msg.obj;
+                    String status = refreshOrder(order);
+                    Toast.makeText(mContext.getApplicationContext(), "Order is " + status,
+                            Toast.LENGTH_SHORT).show();
+                    break;
+
+                case MessageConstants.OPERATION_FAILURE_BAD_REQUEST:
+                    error = (StdResponse) msg.obj;
+                    Toast.makeText(mContext.getApplicationContext(), error.getStatusErr(),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+
+                case MessageConstants.OPERATION_FAILURE_UNAUTHORIZED:
+                    error = (StdResponse) msg.obj;
+                    Toast.makeText(mContext.getApplicationContext(), error.getMerchantErr(),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+
+                case MessageConstants.OPERATION_FAILURE_NOT_FOUND:
+                    error = (StdResponse) msg.obj;
+                    Toast.makeText(mContext.getApplicationContext(), error.getOrderErr(),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+
+                default:
+                    Toast.makeText(mContext.getApplicationContext(),
+                            "There's an issue with the order. Please try again.",
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
     }
 }

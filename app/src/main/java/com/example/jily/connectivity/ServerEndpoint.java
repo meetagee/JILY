@@ -9,6 +9,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ServerEndpoint {
@@ -38,8 +39,17 @@ public interface ServerEndpoint {
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
     @GET("order/get-orders/{merchant_id}")
     Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
                                  @Path("merchant_id") String userId);
+
+    @Headers("Content-Type:application/json")
+    @PUT("order/confirm/{order_id}")
+    Call<ResponseBody> confirmOrder(@Header("access_token") String accessToken,
+                                    @Path("order_id") String orderId);
+
+    @Headers("Content-Type:application/json")
+    @PUT("order/ready/{order_id}")
+    Call<ResponseBody> readyOrder(@Header("access_token") String accessToken,
+                                  @Path("order_id") String orderId);
 }
