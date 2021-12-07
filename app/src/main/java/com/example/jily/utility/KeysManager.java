@@ -38,10 +38,12 @@ public class KeysManager {
                     KeyProperties.KEY_ALGORITHM_RSA, KEY_STORE_NAME);
             keyPairGen.initialize(new KeyGenParameterSpec.Builder(
                     username,
-                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
-                            | KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                    .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setDigests(KeyProperties.DIGEST_SHA256)
                     .setKeySize(User.KEY_SIZE)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
+                            KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();

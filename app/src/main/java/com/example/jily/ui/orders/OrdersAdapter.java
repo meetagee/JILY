@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,30 +30,32 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Cipher;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersViewHolder> {
 
     private final List<Order> orders;
     private final Context mContext;
+    private static final String CIPHER_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
 
     private ServerInterface mServerIf;
     private Handler mHandler;
+    //----------------------------------------------------------------------------------------------
+    // QR CODE HANDLERS
+    //----------------------------------------------------------------------------------------------
+    private ImageView containerQrCode;
+    private AlertDialog dialog;
 
-    public static class OrdersViewHolder extends RecyclerView.ViewHolder {
+    public OrdersAdapter(ArrayList<Order> myDataset, Context context) {
+        orders = myDataset;
+        mContext = context;
 
-        public TextView textOrderTitle;
-        public TextView textOrderStatus;
-        public View layout;
-
-        // Provide a reference to the views for each order
-        public OrdersViewHolder(View v) {
-            super(v);
-            layout = v;
-            textOrderTitle = v.findViewById(R.id.text_order_title);
-            textOrderStatus = v.findViewById(R.id.text_order_status);
-        }
+        mServerIf = ServerInterface.getInstance();
+        mHandler = new OrdersAdapter.OrdersHandler();
     }
 
     public void add(int position, Order item) {
@@ -65,14 +68,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         orders.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, getItemCount());
-    }
-
-    public OrdersAdapter(ArrayList<Order> myDataset, Context context) {
-        orders = myDataset;
-        mContext = context;
-
-        mServerIf = ServerInterface.getInstance();
-        mHandler = new OrdersAdapter.OrdersHandler();
     }
 
     @NonNull
@@ -113,12 +108,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         return orders.size();
     }
 
-    //----------------------------------------------------------------------------------------------
-    // QR CODE HANDLERS
-    //----------------------------------------------------------------------------------------------
-    private ImageView containerQrCode;
-    private AlertDialog dialog;
-
     private void initDialog(View v) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(
@@ -148,6 +137,21 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         return bitmap;
     }
 
+    public static class OrdersViewHolder extends RecyclerView.ViewHolder {
+
+        public TextView textOrderTitle;
+        public TextView textOrderStatus;
+        public View layout;
+
+        // Provide a reference to the views for each order
+        public OrdersViewHolder(View v) {
+            super(v);
+            layout = v;
+            textOrderTitle = v.findViewById(R.id.text_order_title);
+            textOrderStatus = v.findViewById(R.id.text_order_status);
+        }
+    }
+
     private class OrdersHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
@@ -155,8 +159,19 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             switch (msg.arg2) {
                 case MessageConstants.OPERATION_SUCCESS:
                     Order order = (Order) msg.obj;
-                    // TODO: Decrypt `order.getSecret()` with user's public key first
-                    containerQrCode.setImageBitmap(generateQrCode(order.getSecret()));
+                    Cipher decryptCipher;
+                    byte[] secretBytes = order.getSecret().getBytes(StandardCharsets.UTF_8);
+                    byte[] decryptedSecretBytes = null;
+                    try {
+                        decryptCipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
+                        decryptCipher.init(Cipher.DECRYPT_MODE, RuntimeManager.getInstance().getCurrentUser().getPrivateKey());
+                        decryptedSecretBytes = decryptCipher.doFinal(secretBytes);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    String decryptedSecretStr = new String(decryptedSecretBytes, StandardCharsets.UTF_8);
+                    Log.w("[OrdersAdapter] HandleMessage", "Decrypt: " + decryptedSecretStr);
+                    containerQrCode.setImageBitmap(generateQrCode(decryptedSecretStr));
                     dialog.show();
                     break;
 

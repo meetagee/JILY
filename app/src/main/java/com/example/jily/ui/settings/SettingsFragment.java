@@ -48,7 +48,7 @@ public class SettingsFragment extends Fragment {
         homeViewModel.getText().observe(getViewLifecycleOwner(), tvUserId::setText);
 
         final TextView tvUserPubkey = binding.textUserPubkey;
-        CharSequence displayPubkey = "Public key: " + currentUser.getPublicKey();
+        CharSequence displayPubkey = "Public key: " + currentUser.getPublicKeyStr();
         tvUserPubkey.setText(displayPubkey);
         homeViewModel.getText().observe(getViewLifecycleOwner(), tvUserPubkey::setText);
 
