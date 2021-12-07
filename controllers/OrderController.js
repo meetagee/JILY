@@ -30,21 +30,24 @@ const confirm_order = async (req, res) => {
 
     if (!order) {
         res.status(404).json({order: "Order not found!"});
+        return;
     }
 
     if (!(order.merchant_id === user._id)) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
+        return;
     }
 
     if (!(order.status === "Waiting for Confirmation")) {
         res.status(400).json({status: `The order is not waiting for confirmation, it is ${order.status}!`});
+        return;
     }
 
     const updated_order = Order.findByIdAndUpdate(order_id, {status: "In Progress"}).catch((err) => {
         if (err) {
             console.log(err);
             res.status(400).json({status: 'The order could not be marked as in progress!'});
-
+            return;
         }
     });
 
@@ -65,14 +68,17 @@ const mark_order_ready = async (req, res) => {
 
     if (!order) {
         res.status(404).json({order: "Order not found!"});
+        return;
     }
 
     if (!(order.merchant_id === user._id)) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
+        return;
     }
 
     if (!(order.status === "In Progress")) {
         res.status(400).json({status: `The order is not in progress, it is ${order.status}!`});
+        return;
     }
 
 	const salt = await bcrypt.genSalt();
@@ -82,6 +88,7 @@ const mark_order_ready = async (req, res) => {
         if (err) {
             console.log(err);
             res.status(400).json({status: 'The order could not be marked as ready!'});
+            return;
         }
     });
 
@@ -103,23 +110,28 @@ const get_order_secret = async (req, res) => {
 
     if (!order) {
         res.status(404).json({order: "Order not found!"});
+        return;
     }
 
     if (!merchant) {
         res.status(404).json({merchant: "Merchant not found!"});
+        return;
     }
 
     if (!(order.customer_id === user._id)) {
         res.status(401).json({merchant: `Customer cannot get qr code for order ${order_id}!`});
+        return;
     }
 
     if (!(order.status === "Ready For Pickup")) {
         res.status(400).json({status: `The order is not ready for pick up, it is ${order.status}!`});
+        return;
     }
 
     if (!(order.secret)) {
         console.log(`Error: order secret should not be undefined`);
         res.status(500).json({order: 'Internal error: please contact customer service!'});
+        return;
     }
 
     const encrypted_secret_merchant = encrypt_data(merchant.public_key, order.secret);
@@ -136,24 +148,29 @@ const mark_order_completed = async (req, res) => {
 
     if (!order) {
         res.status(404).json({order: "Order not found!"});
+        return;
     }
 
     if (!(order.merchant_id === user._id)) {
         res.status(401).json({merchant: `Merchants cannot mark order ${order_id} as complete!`});
+        return;
     }
 
     if (!(order.status === "Ready For Pickup")) {
         res.status(400).json({status: `The order is not ready for pick up, it is ${order.status}!`});
+        return;
     }
 
     if (!(await bcrypt.compare(secret, order.secret))) {
         res.status(400).json({secret: 'The secret does not match!'});
+        return;
     }
 
     const updated_order = await Order.findByIdAndUpdate(order._id, {$set: { "status": "Completed"}}).catch((err) => {
         if (err) {
             console.log(err)
             res.status(400).json({status: 'The order could not be marked as completed!'});
+            return;
         }
     });
     
@@ -193,6 +210,7 @@ const get_order_by_id = async (req, res) => {
     const order = await Order.findById(req.params.order_id).select('-secret').catch((err) => {
         console.log(err);
         res.status(500).json({order: "Internal error has occuered!"});
+        return;
     });
 
     if (!order) {
