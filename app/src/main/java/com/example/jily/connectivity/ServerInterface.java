@@ -83,8 +83,8 @@ public class ServerInterface {
                              int responseType, int request, int reason) {
         String error = null;
         try {
-            assert response.errorBody() != null;
-            error = response.errorBody().string();
+            assert response.body() != null;
+            error = response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -295,19 +295,14 @@ public class ServerInterface {
                         Gson gson = new Gson();
                         Restaurant merchants = gson.fromJson(response.body().string(), Restaurant.class);
                         if (merchants.getMerchants().size() > 0) {
-                            // Send merchant's details
+                            // Send merchant's details; a default message is already set up when
+                            // there are no merchants as no explicit error is provided by the server
                             Message readMsg = mHandler.obtainMessage(
                                     MessageConstants.MESSAGE_RESTAURANT_RESPONSE,
                                     MessageConstants.REQUEST_GET,
                                     MessageConstants.OPERATION_SUCCESS,
                                     merchants);
                             readMsg.sendToTarget();
-                        } else {
-                            // Tell user no merchants were found
-                            stdResponse(response,
-                                    MessageConstants.MESSAGE_RESTAURANT_RESPONSE,
-                                    MessageConstants.REQUEST_GET,
-                                    MessageConstants.OPERATION_FAILURE_NOT_FOUND);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

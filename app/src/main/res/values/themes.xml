@@ -9,6 +9,11 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
     </style>
 
+    <style name="Theme.JILY.Dialog" parent="@android:style/Theme.Material.Light.Dialog.NoActionBar">
+        <item name="colorAccent">@color/primary</item>
+        <item name="android:colorAccent">@color/primary</item>
+    </style>
+
     <style name="Theme.JILY.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

@@ -20,7 +20,6 @@ import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
-import com.example.jily.model.Restaurant;
 import com.example.jily.model.User;
 
 import java.util.ArrayList;
@@ -88,13 +87,7 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
         final String status = "Open";
 
         holder.textRestaurantTitle.setText(name);
-        holder.textRestaurantTitle.setOnClickListener(v -> {
-            // Inflate a dialog with a menu
-            LayoutInflater inflater = LayoutInflater.from(mContext);
-            View view = inflater.inflate(
-                    R.layout.dialog_menu, (ViewGroup) v.getParent(), false);
-            initDialog(view, position);
-        });
+        holder.textRestaurantTitle.setOnClickListener(v -> initDialog(position));
 
         holder.textRestaurantStatus.setText(status);
     }
@@ -108,25 +101,39 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
     //----------------------------------------------------------------------------------------------
     // MENU HANDLERS
     //----------------------------------------------------------------------------------------------
-    private void initDialog(@NonNull View v, int position) {
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
-                .setView(v)
+    private void initDialog(int position) {
+        // Create a dialog to display the menu to the user
+        ArrayList<Integer> selection = new ArrayList<>();
+        AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
                 .setTitle("Create your order")
-                .setPositiveButton("Confirm", (dialog1, which) -> createOrder(position))
+                .setMultiChoiceItems(R.array.menu, null, (dialog1, which, isChecked) -> {
+                    if (isChecked) {
+                        selection.add(which);
+                    } else if (selection.contains(which)) {
+                        selection.remove(Integer.valueOf(which));
+                    }
+                })
+                .setPositiveButton("Confirm", (dialog2, which) ->
+                        createOrder(position, selection))
                 .setNegativeButton("Cancel", null).create();
 
-        dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(mContext.getResources().getColor(R.color.primary)));
         dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
                 .setTextColor(mContext.getResources().getColor(R.color.primary_dark)));
 
         dialog.show();
     }
 
-    private void createOrder(int position) {
+    private void createOrder(int position, ArrayList<Integer> selection) {
+        // Retrieve the list of selected items from the menu
+        String[] menu = mContext.getResources().getStringArray(R.array.menu);
+        List<String> items = new ArrayList<>();
+
+        for (int i = 0; i < selection.size(); i++) {
+            items.add(menu[selection.get(i)]);
+        }
+
+        // Create a new order
         User currentUser = RuntimeManager.getInstance().getCurrentUser();
-        // TODO: Replace items with checkboxes user can select?
-        List<String> items = Arrays.asList("veggie bowl", "veggie drink", "veggie salad");
         Order order = new Order(
                 currentUser.getUserId(),
                 restaurants.get(position).getUserId(),
@@ -143,10 +150,8 @@ public class RestaurantsAdapter extends RecyclerView.Adapter<RestaurantsAdapter.
         public void handleMessage(Message msg) {
             switch (msg.arg2) {
                 case MessageConstants.OPERATION_SUCCESS:
-                    Order Order = (Order) msg.obj;
-                    // TODO: Send order_id to Orders fragment?
+                    // Orders are retrieved when user navigates to Orders fragment
                     break;
-
                 case MessageConstants.OPERATION_FAILURE_BAD_REQUEST:
                     String error = (String) msg.obj;
                     Toast.makeText(mContext.getApplicationContext(), error, Toast.LENGTH_SHORT)

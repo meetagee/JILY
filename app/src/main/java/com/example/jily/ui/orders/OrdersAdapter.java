@@ -104,13 +104,10 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         containerQrCode.setImageBitmap(generateQrCode(message));
 
         // Create a dialog to display the QR code to the user
-        AlertDialog dialog = new AlertDialog.Builder(mContext)
+        AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
                 .setView(v)
                 .setTitle("Your confirmation QR code")
                 .setPositiveButton("Close", null).create();
-
-        dialog.setOnShowListener(arg -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                .setTextColor(mContext.getResources().getColor(R.color.primary)));
 
         dialog.show();
     }
