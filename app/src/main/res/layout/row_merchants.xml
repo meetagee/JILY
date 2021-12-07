@@ -6,10 +6,10 @@
     android:padding="10dip">
 
     <ImageView
-        android:id="@+id/icon_restaurant"
+        android:id="@+id/icon_merchant"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_menu_restaurants"
+        android:background="@drawable/ic_menu_merchants"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.049"
@@ -18,7 +18,7 @@
         app:layout_constraintVertical_bias="0.058" />
 
     <TextView
-        android:id="@+id/text_restaurant_title"
+        android:id="@+id/text_merchant_title"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="15dp"
@@ -28,13 +28,13 @@
         android:text="@string/text_title"
         android:textColor="@color/primary_dark"
         android:textSize="@dimen/text_small"
-        app:layout_constraintBottom_toTopOf="@id/text_restaurant_status"
+        app:layout_constraintBottom_toTopOf="@id/text_merchant_status"
         app:layout_constraintEnd_toStartOf="@id/button_more"
-        app:layout_constraintStart_toEndOf="@id/icon_restaurant"
-        app:layout_constraintTop_toTopOf="@id/icon_restaurant" />
+        app:layout_constraintStart_toEndOf="@id/icon_merchant"
+        app:layout_constraintTop_toTopOf="@id/icon_merchant" />
 
     <TextView
-        android:id="@+id/text_restaurant_status"
+        android:id="@+id/text_merchant_status"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="15dp"
@@ -46,8 +46,8 @@
         android:textSize="@dimen/text_xsmall"
         app:layout_constraintBottom_toBottomOf="@id/button_more"
         app:layout_constraintEnd_toStartOf="@id/button_more"
-        app:layout_constraintStart_toEndOf="@id/icon_restaurant"
-        app:layout_constraintTop_toBottomOf="@id/text_restaurant_title" />
+        app:layout_constraintStart_toEndOf="@id/icon_merchant"
+        app:layout_constraintTop_toBottomOf="@id/text_merchant_title" />
 
     <ImageButton
         android:id="@+id/button_more"
@@ -73,6 +73,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/icon_restaurant" />
+        app:layout_constraintTop_toBottomOf="@id/icon_merchant" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

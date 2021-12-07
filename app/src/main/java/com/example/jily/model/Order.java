@@ -17,7 +17,7 @@ public class Order {
     @Expose
     private String merchantId;
 
-    @SerializedName("order_id")
+    @SerializedName(value = "order_id", alternate = "_id")
     @Expose
     private String orderId;
 

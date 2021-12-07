@@ -115,7 +115,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     private Bitmap generateQrCode(String status) {
         MultiFormatWriter writer = new MultiFormatWriter();
         Bitmap bitmap = null;
-        int dimen = 350;
+        int dimen = 650;
 
         try {
             BitMatrix matrix = writer.encode(status, BarcodeFormat.QR_CODE, dimen, dimen);

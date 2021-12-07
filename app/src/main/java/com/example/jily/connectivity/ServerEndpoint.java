@@ -37,7 +37,7 @@ public interface ServerEndpoint {
                                    @Path("user_id") String userId);
 
     //----------------------------------------------------------------------------------------------
-    // RESTAURANT HANDLERS
+    // MERCHANT HANDLERS
     //----------------------------------------------------------------------------------------------
     @GET("user/merchants")
     Call<ResponseBody> getMerchants(@Header("access_token") String accessToken);
@@ -50,4 +50,8 @@ public interface ServerEndpoint {
     @POST("order/new-order")
     Call<ResponseBody> createOrder(@Header("access_token") String accessToken,
                                    @Body Order order);
+
+    @GET("order/get-orders/{merchant_id}")
+    Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
+                                 @Path("merchant_id") String userId);
 }

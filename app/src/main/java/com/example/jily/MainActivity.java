@@ -2,12 +2,9 @@ package com.example.jily;
 
 import android.os.Bundle;
 
-import com.example.jily.model.Restaurant;
-import com.example.jily.ui.restaurants.RestaurantsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -33,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_restaurants, R.id.nav_orders, R.id.nav_settings)
+                R.id.nav_merchants, R.id.nav_orders, R.id.nav_settings)
                 .build();
         NavController navController = Navigation.findNavController(
                 this, R.id.nav_host_fragment_activity_main);
