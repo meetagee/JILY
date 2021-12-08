@@ -32,12 +32,8 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-
-import javax.crypto.Cipher;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersViewHolder> {
     private final List<Order> orders;
@@ -91,7 +87,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
         holder.buttonQrCode.setOnClickListener(v -> {
             // Inflate a dialog that will hold the QR code of the encrypted message
-            initDialog(v);
+            initDialog(v, position);
 
             // Retrieve the encrypted order secret that will be included in the QR code
             // TODO: The point at which this is called may change once integrated with Firebase
@@ -108,7 +104,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         return orders.size();
     }
 
-    private void initDialog(View v) {
+    private void initDialog(View v, int position) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(
                 R.layout.dialog_qr_code, (ViewGroup) v.getParent(), false);
@@ -118,7 +114,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
                 .setView(view)
                 .setTitle("Your confirmation QR code")
-                .setPositiveButton("Close", null).create();
+                .setPositiveButton("Close", (dialog, which) -> getOrder(position)).create();
     }
 
     private Bitmap generateQrCode(String status) {
@@ -135,6 +131,24 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         }
 
         return bitmap;
+    }
+
+    private void getOrder(int position) {
+        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+        mServerIf.setHandler(mHandler);
+        mServerIf.getOrderById(currentUser, orders.get(position));
+    }
+
+    private void refreshOrder(Order order) {
+        for (int position = 0; position < orders.size(); position++) {
+            if (orders.get(position).getOrderId().equals(order.getOrderId())) {
+                // Update the order status and current view
+                orders.get(position).setStatus(order.getStatus());
+                notifyItemRemoved(position);
+                notifyItemInserted(position);
+                break;
+            }
+        }
     }
 
     public static class OrdersViewHolder extends RecyclerView.ViewHolder {
@@ -161,10 +175,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             switch (msg.arg2) {
                 case MessageConstants.OPERATION_SUCCESS:
                     Order order = (Order) msg.obj;
-                    String finalString = CryptoHandler.getInstance().decryptPrivate(order.getSecret());
-                    Log.w("[OrdersHandler] HandleMessage", "Final: " + finalString);
-                    containerQrCode.setImageBitmap(generateQrCode(finalString));
-                    dialog.show();
+                    if (msg.what == MessageConstants.MESSAGE_SECRET_RESPONSE) {
+                        String finalString =
+                                CryptoHandler.getInstance().decryptPrivate(order.getSecret());
+                        Log.w("[OrdersHandler] HandleMessage", "Final: " + finalString);
+                        containerQrCode.setImageBitmap(generateQrCode(finalString));
+                        dialog.show();
+                    } else {
+                        refreshOrder(order);
+                    }
                     break;
 
                 case MessageConstants.OPERATION_FAILURE_BAD_REQUEST:
