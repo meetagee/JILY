@@ -25,6 +25,7 @@ import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.User;
 import com.example.jily.model.User.UserType;
+import com.example.jily.utility.CryptoHandler;
 import com.example.jily.utility.KeysManager;
 
 import java.io.IOException;
@@ -147,7 +148,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                 User newUser = null;
                 try {
                     newUser = new User(username,
-                            password,
+                            CryptoHandler.getInstance().sha256Hash(password),
                             signUpPubKey,
                             signUpPrivateKey,
                             mUserType.toString(),
