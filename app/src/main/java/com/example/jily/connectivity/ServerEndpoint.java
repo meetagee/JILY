@@ -45,7 +45,6 @@ public interface ServerEndpoint {
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
     @Headers("Content-Type:application/json")
     @POST("order/new-order")
     Call<ResponseBody> createOrder(@Header("access_token") String accessToken,
@@ -54,6 +53,10 @@ public interface ServerEndpoint {
     @GET("order/get-orders/{merchant_id}")
     Call<ResponseBody> getOrders(@Header("access_token") String accessToken,
                                  @Path("merchant_id") String userId);
+
+    @GET("order/get-order/{order_id}")
+    Call<ResponseBody> getOrderById(@Header("access_token") String accessToken,
+                                    @Path("order_id") String orderId);
 
     @GET("order/get-order-secret/{order_id}")
     Call<ResponseBody> getOrderSecret(@Header("access_token") String accessToken,

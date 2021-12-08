@@ -337,7 +337,6 @@ public class ServerInterface {
     //----------------------------------------------------------------------------------------------
     // ORDER HANDLERS
     //----------------------------------------------------------------------------------------------
-    // TODO: Specify endpoints
     public void createOrder(User user, Order order) {
         server.createOrder(user.getAccessToken(), order).enqueue(new Callback<ResponseBody>() {
             @Override
@@ -419,8 +418,8 @@ public class ServerInterface {
         });
     }
 
-    public void getOrderSecret(User user, Order order) {
-        server.getOrderSecret(user.getAccessToken(), order.getOrderId()).enqueue(new Callback<ResponseBody>() {
+    public void getOrderById(User user, Order order) {
+        server.getOrderById(user.getAccessToken(), order.getOrderId()).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -437,16 +436,6 @@ public class ServerInterface {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                } else if (response.code() == BAD_REQUEST) {
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_ORDER_RESPONSE,
-                            MessageConstants.REQUEST_GET,
-                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
-                } else if (response.code() == UNAUTHORIZED) {
-                    stdResponse(response,
-                            MessageConstants.MESSAGE_ORDER_RESPONSE,
-                            MessageConstants.REQUEST_GET,
-                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
                 } else if (response.code() == NOT_FOUND) {
                     stdResponse(response,
                             MessageConstants.MESSAGE_ORDER_RESPONSE,
@@ -455,6 +444,61 @@ public class ServerInterface {
                 } else if (response.code() == SERVER_ERROR) {
                     stdResponse(response,
                             MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] GetOrder", "Response:" + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] GetOrder", "Failure:" + t.getMessage());
+            }
+        });
+    }
+
+    public void getOrderSecret(User user, Order order) {
+        server.getOrderSecret(user.getAccessToken(), order.getOrderId()).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        Gson gson = new Gson();
+                        Order order = gson.fromJson(response.body().string(), Order.class);
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_SECRET_RESPONSE,
+                                MessageConstants.REQUEST_GET,
+                                MessageConstants.OPERATION_SUCCESS,
+                                order);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == BAD_REQUEST) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_SECRET_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
+                } else if (response.code() == UNAUTHORIZED) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_SECRET_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
+                } else if (response.code() == NOT_FOUND) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_SECRET_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
+                } else if (response.code() == SERVER_ERROR) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_SECRET_RESPONSE,
                             MessageConstants.REQUEST_GET,
                             MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
                 } else {

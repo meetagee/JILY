@@ -7,6 +7,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class MerchantsAdapter extends RecyclerView.Adapter<MerchantsAdapter.Merc
 
         public TextView textMerchantTitle;
         public TextView textMerchantStatus;
+        public ImageButton buttonMenu;
         public View layout;
 
         // Provide a reference to the views for each merchant
@@ -45,6 +47,7 @@ public class MerchantsAdapter extends RecyclerView.Adapter<MerchantsAdapter.Merc
             layout = v;
             textMerchantTitle = v.findViewById(R.id.text_merchant_title);
             textMerchantStatus = v.findViewById(R.id.text_merchant_status);
+            buttonMenu = v.findViewById(R.id.button_menu);
         }
     }
 
@@ -86,9 +89,9 @@ public class MerchantsAdapter extends RecyclerView.Adapter<MerchantsAdapter.Merc
         final String status = "Open";
 
         holder.textMerchantTitle.setText(name);
-        holder.textMerchantTitle.setOnClickListener(v -> initDialog(position));
-
         holder.textMerchantStatus.setText(status);
+
+        holder.buttonMenu.setOnClickListener(v -> initDialog(position));
     }
 
     @Override

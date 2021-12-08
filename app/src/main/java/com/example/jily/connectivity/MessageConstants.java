@@ -3,11 +3,12 @@ package com.example.jily.connectivity;
 public interface MessageConstants {
 
     // Constants defining what type of response the server returned
-    int MESSAGE_LOGIN_RESPONSE      = 0;
-    int MESSAGE_LOGOUT_RESPONSE     = 1;
-    int MESSAGE_USER_RESPONSE       = 2;
+    int MESSAGE_LOGIN_RESPONSE    = 0;
+    int MESSAGE_LOGOUT_RESPONSE   = 1;
+    int MESSAGE_USER_RESPONSE     = 2;
     int MESSAGE_MERCHANT_RESPONSE = 3;
-    int MESSAGE_ORDER_RESPONSE      = 4;
+    int MESSAGE_ORDER_RESPONSE    = 4;
+    int MESSAGE_SECRET_RESPONSE   = 5;
 
     // Constants defining the HTTP method requested
     int REQUEST_CREATE = 0;
@@ -24,5 +25,7 @@ public interface MessageConstants {
     String DUPLICATE_USER_ERR_STRING = "The username already exists!";
     String USERNAME_NOT_REGISTERED = "The username has not been registered!";
     String PASSWORD_INCORRECT = "The password is incorrect!";
+
+    String STATUS_COMPLETED = "Completed";
 }
 
