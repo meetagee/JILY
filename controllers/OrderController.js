@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const notifyUser = require('../utils/notification');
 
+const RSA_2048_BLOCK_SIZE_BYTES = 214;
 
 const generate_secret = (order) => {
     secret_string = order._id.toString() + order.customer_id.toString() + order.merchant_id.toString() + order.items.reduce((previous_value, current_value) => previous_value + current_value);
@@ -16,11 +17,32 @@ const encrypt_data = (public_key, data) => {
     return crypto.publicEncrypt(
         {
           key: public_key,
-          padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-          oaepHash: "sha256",
+          padding: crypto.constants.RSA_PKCS1_PADDING,
         },
         Buffer.from(data)
       ).toString("base64");
+}
+
+const generate_chunks = (secret) => {
+    var ret_chunks = [];
+
+    const num_chunks = Math.ceil(secret.length / RSA_2048_BLOCK_SIZE_BYTES)
+    for (let i = 0, o = 0; i < num_chunks; ++i, o += RSA_2048_BLOCK_SIZE_BYTES) {
+        ret_chunks[i] = secret.substr(o, RSA_2048_BLOCK_SIZE_BYTES);
+    }
+
+    return ret_chunks;
+}
+
+const public_encrypt_chunks_data = (data_chunks, key) => {
+    var ret_encrypted_chunks = [];
+
+    data_chunks.forEach((chunk) => {
+        const encrypted_chunk = encrypt_data(key, chunk);
+        ret_encrypted_chunks.push(encrypted_chunk);
+    });
+
+    return ret_encrypted_chunks;
 }
 
 const confirm_order = async (req, res) => {
@@ -134,10 +156,15 @@ const get_order_secret = async (req, res) => {
         return;
     }
 
-    const encrypted_secret_merchant = encrypt_data(merchant.public_key, order.secret);
-    const encrypted_secret = encrypt_data(user.public_key, encrypted_secret_merchant);
+    const secret_merchant_chunks = generate_chunks(order.secret);
+    const encrypted_secret_merchant = public_encrypt_chunks_data(secret_merchant_chunks, merchant.public_key);
+    console.log("Merchant encrypted secret: ", encrypted_secret_merchant);
 
-    res.status(200).json({order_id: order._id, status: order.status, secret: encrypted_secret});
+    const secret_customer_chunks = generate_chunks(encrypted_secret_merchant.join(""));
+    const encrypted_secret_customer = public_encrypt_chunks_data(secret_customer_chunks, user.public_key);
+    console.log("Customer encrypted secret: ", encrypted_secret_customer);
+
+    res.status(200).json({order_id: order._id, status: order.status, secret: encrypted_secret_customer});
 }
 
 const mark_order_completed = async (req, res) => {
@@ -173,7 +200,7 @@ const mark_order_completed = async (req, res) => {
             return;
         }
     });
-    
+
     try {
         notifyUser(order.customer_id, `Your order ${order_id} has been completed.`);
         notifyUser(order.merchant_id, `Your order ${order_id} has been completed.`);
