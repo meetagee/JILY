@@ -35,6 +35,7 @@ public class ServerInterface {
     private final int FORBIDDEN = 403;
     private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
+    private final int SERVER_ERROR = 500;
 
     private final ServerEndpoint server;
     private Handler mHandler;
@@ -64,8 +65,7 @@ public class ServerInterface {
         String baseUrl = "http://";
         if (BuildConfig.BUILD_TYPE.equals("debug")) {
             baseUrl += DebugConstants.SERVER_IP;
-        }
-        else {
+        } else {
             baseUrl += SERVER_IP;
         }
         baseUrl += (":" + SERVER_PORT + "/");
