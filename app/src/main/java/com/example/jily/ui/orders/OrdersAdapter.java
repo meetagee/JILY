@@ -8,6 +8,7 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +26,7 @@ import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
+import com.example.jily.model.Secret;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -35,23 +38,28 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
     private final List<Order> orders;
     private final Context mContext;
-    private ActivityResultLauncher<Intent> mActivityResultLauncher;
+    private final ActivityResultLauncher<Intent> mActivityResultLauncher;
+    private int currentOrder;
 
-    private ServerInterface mServerIf;
-    private Handler mHandler;
+    private final ServerInterface mServerIf;
+    private final Handler mHandler;
 
     public static class OrdersViewHolder extends RecyclerView.ViewHolder {
 
+        public ConstraintLayout layoutRowOrder;
         public TextView textOrderTitle;
         public TextView textOrderStatus;
+        public ImageButton buttonQrCodeScanner;
         public View layout;
 
         // Provide a reference to the views for each order
         public OrdersViewHolder(View v) {
             super(v);
             layout = v;
+            layoutRowOrder = v.findViewById(R.id.row_orders);
             textOrderTitle = v.findViewById(R.id.text_order_title);
             textOrderStatus = v.findViewById(R.id.text_order_status);
+            buttonQrCodeScanner = v.findViewById(R.id.button_qr_code_scanner);
         }
     }
 
@@ -93,10 +101,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         final String name = "Order " + orders.get(position).getOrderId();
         final String status = orders.get(position).getStatus();
 
-        holder.textOrderTitle.setText(name);
-        holder.textOrderTitle.setOnClickListener(v -> initDialog(position));
+        holder.layoutRowOrder.setOnClickListener(v -> initDialog(position));
 
+        holder.textOrderTitle.setText(name);
         holder.textOrderStatus.setText(status);
+
+        holder.buttonQrCodeScanner.setOnClickListener(v -> {
+            currentOrder = position;
+            scanOrder();
+        });
     }
 
     @Override
@@ -109,7 +122,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     // CONFIRMATION HANDLERS
     //----------------------------------------------------------------------------------------------
     private void initDialog(int position) {
-        // Create a dialog to prompt the merchant to update the order status
+        // Create a dialog to prompt the user to update the order status
         AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.Theme_JILY_Dialog)
                 .setTitle("Update order status")
                 .setSingleChoiceItems(R.array.status, 0, null)
@@ -162,10 +175,18 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             if (orders.get(i).getOrderId().equals(order.getOrderId())) {
                 // Update the order status
                 String status = order.getStatus();
-                if (status.equals(MessageConstants.STATUS_CONFIRM)) {
-                    orders.get(i).setStatus(MessageConstants.STATUS_PROGRESS);
-                } else if (status.equals(MessageConstants.STATUS_PROGRESS)) {
-                    orders.get(i).setStatus(MessageConstants.STATUS_READY);
+                switch (status) {
+                    case MessageConstants.STATUS_CONFIRM:
+                        orders.get(i).setStatus(MessageConstants.STATUS_PROGRESS);
+                        break;
+
+                    case MessageConstants.STATUS_PROGRESS:
+                        orders.get(i).setStatus(MessageConstants.STATUS_READY);
+                        break;
+
+                    case MessageConstants.STATUS_READY:
+                        orders.get(i).setStatus(MessageConstants.STATUS_COMPLETED);
+                        break;
                 }
 
                 // Notify the current view that the order has been updated
@@ -177,6 +198,12 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         }
 
         return orders.get(i).getStatus();
+    }
+
+    public void completeOrder(String secret) {
+        User currentUser = RuntimeManager.getInstance().getCurrentUser();
+        mServerIf.setHandler(mHandler);
+        mServerIf.completeOrder(currentUser, orders.get(currentOrder), new Secret(secret));
     }
 
     private class OrdersHandler extends Handler {
@@ -193,7 +220,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
                 case MessageConstants.OPERATION_FAILURE_BAD_REQUEST:
                     error = (StdResponse) msg.obj;
-                    Toast.makeText(mContext.getApplicationContext(), error.getStatusErr(),
+                    String message = (error.getStatusErr() == null) ? error.getSecretErr() :
+                            error.getStatusErr();
+                    Toast.makeText(mContext.getApplicationContext(), message,
                             Toast.LENGTH_SHORT).show();
                     break;
 

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import com.example.jily.BuildConfig;
 import com.example.jily.model.Order;
 import com.example.jily.model.Orders;
+import com.example.jily.model.Secret;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.example.jily.utility.DebugConstants;
@@ -430,6 +431,56 @@ public class ServerInterface {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("[ServerInterface] ReadyOrder", "Failure:" + t.getMessage());
+            }
+        });
+    }
+
+    public void completeOrder(User user, Order order, Secret secret) {
+        server.completeOrder(user.getAccessToken(), order.getOrderId(), secret).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        Gson gson = new Gson();
+                        Order order = gson.fromJson(response.body().string(), Order.class);
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_ORDER_RESPONSE,
+                                MessageConstants.REQUEST_UPDATE,
+                                MessageConstants.OPERATION_SUCCESS,
+                                order);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == BAD_REQUEST) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_UPDATE,
+                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
+                } else if (response.code() == UNAUTHORIZED) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_UPDATE,
+                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
+                } else if (response.code() == NOT_FOUND) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_UPDATE,
+                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] CompleteOrder", "Response:" + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] CompleteOrder", "Failure:" + t.getMessage());
             }
         });
     }

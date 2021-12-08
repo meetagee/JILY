@@ -1,5 +1,6 @@
 package com.example.jily.connectivity;
 
+import com.example.jily.model.Secret;
 import com.example.jily.model.User;
 
 import okhttp3.ResponseBody;
@@ -52,4 +53,10 @@ public interface ServerEndpoint {
     @PUT("order/ready/{order_id}")
     Call<ResponseBody> readyOrder(@Header("access_token") String accessToken,
                                   @Path("order_id") String orderId);
+
+    @Headers("Content-Type:application/json")
+    @PUT("order/completed/{order_id}")
+    Call<ResponseBody> completeOrder(@Header("access_token") String accessToken,
+                                     @Path("order_id") String orderId,
+                                     @Body Secret secret);
 }

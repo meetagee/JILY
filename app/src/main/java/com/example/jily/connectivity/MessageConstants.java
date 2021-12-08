@@ -28,5 +28,6 @@ public interface MessageConstants {
     String STATUS_CONFIRM = "Waiting for Confirmation";
     String STATUS_PROGRESS = "In Progress";
     String STATUS_READY = "Ready For Pickup";
+    String STATUS_COMPLETED = "Completed";
 }
 

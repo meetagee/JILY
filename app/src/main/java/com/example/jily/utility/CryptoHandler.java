@@ -38,13 +38,15 @@ public class CryptoHandler {
         Cipher decryptCipher;
         for (String chunk : input) {
             byte[] secretBytes = Base64.getDecoder().decode(chunk);
-            byte[] decryptedSecretBytes = null;
+            byte[] decryptedSecretBytes;
             try {
                 decryptCipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
                 decryptCipher.init(Cipher.DECRYPT_MODE, RuntimeManager.getInstance().getCurrentUser().getPrivateKey());
                 decryptedSecretBytes = decryptCipher.doFinal(secretBytes);
             } catch (Exception e) {
                 e.printStackTrace();
+                // HACK: Used as an indicator for letting the customer know to regenerate QR code
+                return null;
             }
             String decryptedSecretStr = new String(decryptedSecretBytes, StandardCharsets.UTF_8);
             finalStringBuilder.append(decryptedSecretStr);

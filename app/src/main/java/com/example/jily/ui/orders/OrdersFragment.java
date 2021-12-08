@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -17,12 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.databinding.FragmentOrdersBinding;
+import com.example.jily.utility.CryptoHandler;
 import com.google.zxing.client.android.Intents;
+
+import java.util.Collections;
 
 public class OrdersFragment extends Fragment {
 
     private OrdersViewModel ordersViewModel;
     private FragmentOrdersBinding binding;
+    private OrdersAdapter ordersAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -40,8 +45,19 @@ public class OrdersFragment extends Fragment {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent intent = result.getData();
                         assert intent != null;
+                        // Decrypt the QR scan result with the user's private key
                         String encryptedSecret = intent.getStringExtra(Intents.Scan.RESULT);
-                        int test = encryptedSecret.length();
+                        String secret = CryptoHandler.getInstance().decryptPrivate(
+                                Collections.singletonList(encryptedSecret));
+
+                        // If secret successfully decrypted, verify it with the backend
+                        if (secret != null) {
+                            ordersAdapter.completeOrder(secret);
+                        } else {
+                            Toast.makeText(getActivity(),
+                                    "Please ask the customer to regenerate the QR code",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
@@ -50,7 +66,8 @@ public class OrdersFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         ordersViewModel.getList().observe(getViewLifecycleOwner(), inList -> {
-            recyclerView.setAdapter(new OrdersAdapter(inList, getContext(), activityResultLauncher));
+            ordersAdapter = new OrdersAdapter(inList, getContext(), activityResultLauncher);
+            recyclerView.setAdapter(ordersAdapter);
         });
 
         return root;
