@@ -15,6 +15,7 @@ import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.User;
+import com.example.jily.utility.CryptoHandler;
 import com.example.jily.utility.KeysManager;
 
 import java.io.IOException;
@@ -69,16 +70,16 @@ public class LoginActivity extends AppCompatActivity {
                 mEditTextPassword.setHint(R.string.text_field_required);
                 mEditTextPassword.setHintTextColor(getColor(R.color.primary_dark));
             } else {
-                KeyPair signupKeyPair = KeysManager.getInstance().getKeyPair(username);
-                PublicKey signUpPubKey = signupKeyPair.getPublic();
-                PrivateKey signUpPrivateKey = signupKeyPair.getPrivate();
+                KeyPair loginKeyPair = KeysManager.getInstance().getKeyPair(username);
+                PublicKey loginPubKey = loginKeyPair.getPublic();
+                PrivateKey loginPrivateKey = loginKeyPair.getPrivate();
 
                 User loginUser = null;
                 try {
                     loginUser = new User(username,
-                            password,
-                            signUpPubKey,
-                            signUpPrivateKey,
+                            CryptoHandler.getInstance().sha256Hash(password),
+                            loginPubKey,
+                            loginPrivateKey,
                             User.DUMMY_USER_TYPE,
                             User.DUMMY_FIREBASE_TOKEN,
                             User.DUMMY_ACCESS_TOKEN,
