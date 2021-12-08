@@ -188,7 +188,7 @@ const mark_order_completed = async (req, res) => {
         return;
     }
 
-    if (!(await bcrypt.compare(secret, order.secret))) {
+    if (!(secret.trim() === order.secret.trim())) {        
         res.status(400).json({secret: 'The secret does not match!'});
         return;
     }
