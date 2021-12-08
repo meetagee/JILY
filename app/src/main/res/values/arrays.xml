@@ -4,4 +4,9 @@
         <item>Veggie drink</item>
         <item>Veggie salad</item>
     </string-array>>
+
+    <string-array name="status">
+        <item>Order is confirmed</item>
+        <item>Order is ready</item>
+    </string-array>>
 </resources>

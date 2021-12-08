@@ -30,18 +30,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button_scan_qr"
-        android:layout_width="@dimen/width_max"
-        android:layout_height="@dimen/height_button_auth"
-        android:background="@drawable/button_round"
-        android:text="@string/button_scan_qr"
-        android:textColor="@color/background"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.822" />
 </androidx.constraintlayout.widget.ConstraintLayout>

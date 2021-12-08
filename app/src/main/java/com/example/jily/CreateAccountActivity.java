@@ -27,12 +27,12 @@ import com.example.jily.model.User;
 import com.example.jily.model.User.UserType;
 import com.example.jily.utility.KeysManager;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 /**
@@ -144,14 +144,19 @@ public class CreateAccountActivity extends AppCompatActivity {
                 PublicKey signUpPubKey = signupKeyPair.getPublic();
                 PrivateKey signUpPrivateKey = signupKeyPair.getPrivate();
 
-                User newUser = new User(username,
-                        password,
-                        Base64.getEncoder().encodeToString(signUpPubKey.getEncoded()),
-                        mUserType.toString(),
-                        User.DUMMY_FIREBASE_TOKEN,
-                        User.DUMMY_ACCESS_TOKEN,
-                        User.DUMMY_USER_ID);
-                newUser.setPrivateKey(signUpPrivateKey);
+                User newUser = null;
+                try {
+                    newUser = new User(username,
+                            password,
+                            signUpPubKey,
+                            signUpPrivateKey,
+                            mUserType.toString(),
+                            User.DUMMY_FIREBASE_TOKEN,
+                            User.DUMMY_ACCESS_TOKEN,
+                            User.DUMMY_USER_ID);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 RuntimeManager.getInstance().setCurrentUser(newUser);
                 mServerIf.setHandler(mHandler);

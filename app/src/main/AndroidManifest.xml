@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.jily">
+
     <!-- Internet permissions. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Data and storage permissions. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Camera permissions. -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:usesCleartextTraffic="${usesCleartextTraffic}"
@@ -46,6 +50,10 @@
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait" />
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="screenOrientation" />
     </application>
 
 </manifest>

@@ -17,10 +17,10 @@ import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.User;
 import com.example.jily.utility.KeysManager;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Base64;
 
 /**
  * Activity that represents where the user can log in to their account via an email and password.
@@ -73,14 +73,19 @@ public class LoginActivity extends AppCompatActivity {
                 PublicKey signUpPubKey = signupKeyPair.getPublic();
                 PrivateKey signUpPrivateKey = signupKeyPair.getPrivate();
 
-                User loginUser = new User(username,
-                        password,
-                        Base64.getEncoder().encodeToString(signUpPubKey.getEncoded()),
-                        User.DUMMY_USER_TYPE,
-                        User.DUMMY_FIREBASE_TOKEN,
-                        User.DUMMY_ACCESS_TOKEN,
-                        User.DUMMY_USER_ID);
-                loginUser.setPrivateKey(signUpPrivateKey);
+                User loginUser = null;
+                try {
+                    loginUser = new User(username,
+                            password,
+                            signUpPubKey,
+                            signUpPrivateKey,
+                            User.DUMMY_USER_TYPE,
+                            User.DUMMY_FIREBASE_TOKEN,
+                            User.DUMMY_ACCESS_TOKEN,
+                            User.DUMMY_USER_ID);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 RuntimeManager.getInstance().setCurrentUser(loginUser);
                 mServerIf.setHandler(mHandler);
