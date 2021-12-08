@@ -5,6 +5,8 @@ import android.util.Log;
 import com.example.jily.connectivity.RuntimeManager;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import javax.crypto.Cipher;
 
 public class CryptoHandler {
     private static final String CIPHER_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
+    private static final String PW_HASH_FUNC = "SHA-256";
     private static volatile CryptoHandler mInstance;
 
     private CryptoHandler() {
@@ -51,5 +54,18 @@ public class CryptoHandler {
             Log.d("[CryptoHandler] DecryptPrivate", "Decrypted: " + decryptedSecretStr);
         }
         return finalStringBuilder.toString();
+    }
+
+    public String sha256Hash(String input) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance(PW_HASH_FUNC);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        assert digest != null;
+        byte[] hashedInput = digest.digest(input.getBytes());
+        return Base64.getEncoder().encodeToString(hashedInput);
     }
 }
