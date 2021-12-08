@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.jily.connectivity.JilyFirebaseMessagingService;
 import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
@@ -23,10 +24,13 @@ public class MerchantsViewModel extends ViewModel {
     private ServerInterface mServerIf;
     private Handler mHandler;
 
+    private boolean mFirebaseTokenUpdated;
+
     public MerchantsViewModel() {
         mText = new MutableLiveData<>();
         mServerIf = ServerInterface.getInstance();
         mHandler = new MerchantsHandler();
+        mFirebaseTokenUpdated = false;
     }
 
     public LiveData<String> getText() {
@@ -51,6 +55,10 @@ public class MerchantsViewModel extends ViewModel {
                 ArrayList<User> listOfMerchants = new ArrayList<>(merchants.getMerchants());
                 mList.postValue(listOfMerchants);
                 mText.postValue("");
+                if (!mFirebaseTokenUpdated) {
+                    JilyFirebaseMessagingService.getInstance().updateFirebaseToken();
+                    mFirebaseTokenUpdated = true;
+                }
             }
         }
     }

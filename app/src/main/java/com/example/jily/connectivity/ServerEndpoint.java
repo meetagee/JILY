@@ -10,6 +10,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ServerEndpoint {
@@ -35,6 +36,11 @@ public interface ServerEndpoint {
     @GET("user/user/{user_id}")
     Call<ResponseBody> getUserType(@Path("access_token") String accessToken,
                                    @Path("user_id") String userId);
+
+    @Headers("Content-Type:application/json")
+    @PUT("user/updateFBtoken")
+    Call<ResponseBody> updateFirebaseToken(@Header("access_token") String accessToken,
+                                           @Body User user);
 
     //----------------------------------------------------------------------------------------------
     // MERCHANT HANDLERS
