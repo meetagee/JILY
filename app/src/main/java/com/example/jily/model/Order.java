@@ -25,7 +25,7 @@ public class Order {
 
     @SerializedName("secret")
     @Expose
-    private String secret; // Base64 string
+    private List<String> secret; // Base64 string
 
     @SerializedName("items")
     @Expose
@@ -35,7 +35,7 @@ public class Order {
                  String merchantId,
                  String orderId,
                  String status,
-                 String secret,
+                 List<String> secret,
                  List<String> items) {
         this.userId = userId;
         this.merchantId = merchantId;
@@ -45,27 +45,51 @@ public class Order {
         this.items = items;
     }
 
-    public String getUserId() { return userId; }
+    public String getUserId() {
+        return userId;
+    }
 
-    public void setUserId(String userId) { this.userId = userId; }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-    public String getMerchantId() { return merchantId; }
+    public String getMerchantId() {
+        return merchantId;
+    }
 
-    public void setMerchantId(String merchantId) { this.merchantId = merchantId; }
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
+    }
 
-    public String getOrderId() { return orderId; }
+    public String getOrderId() {
+        return orderId;
+    }
 
-    public void setOrderId(String orderId) { this.orderId = orderId; }
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 
-    public String getStatus() { return status; }
+    public String getStatus() {
+        return status;
+    }
 
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public String getSecret() { return secret; }
+    public List<String> getSecret() {
+        return secret;
+    }
 
-    public void setSecret(String secret) { this.secret = secret; }
+    public void setSecret(List<String> secret) {
+        this.secret = secret;
+    }
 
-    public List<String> getItems() { return items; }
+    public List<String> getItems() {
+        return items;
+    }
 
-    public void setItems(List<String> items) { this.items = items; }
+    public void setItems(List<String> items) {
+        this.items = items;
+    }
 }

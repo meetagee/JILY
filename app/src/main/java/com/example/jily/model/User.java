@@ -17,8 +17,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 public class User {
-
-    public static final int KEY_SIZE = 2048;
     public static final String DUMMY_FIREBASE_TOKEN = "DUMMY_FIREBASE_TOKEN";
     public static final String DUMMY_ACCESS_TOKEN = "DUMMY_ACCESS_TOKEN";
     public static final String DUMMY_USER_ID = "DUMMY_USER_ID";

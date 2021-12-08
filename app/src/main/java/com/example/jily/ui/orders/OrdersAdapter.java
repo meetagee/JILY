@@ -24,6 +24,7 @@ import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
+import com.example.jily.utility.CryptoHandler;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -32,16 +33,14 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.crypto.Cipher;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersViewHolder> {
-
     private final List<Order> orders;
     private final Context mContext;
-    private static final String CIPHER_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
-
     private ServerInterface mServerIf;
     private Handler mHandler;
     //----------------------------------------------------------------------------------------------
@@ -159,19 +158,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             switch (msg.arg2) {
                 case MessageConstants.OPERATION_SUCCESS:
                     Order order = (Order) msg.obj;
-                    Cipher decryptCipher;
-                    byte[] secretBytes = order.getSecret().getBytes(StandardCharsets.UTF_8);
-                    byte[] decryptedSecretBytes = null;
-                    try {
-                        decryptCipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
-                        decryptCipher.init(Cipher.DECRYPT_MODE, RuntimeManager.getInstance().getCurrentUser().getPrivateKey());
-                        decryptedSecretBytes = decryptCipher.doFinal(secretBytes);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    String decryptedSecretStr = new String(decryptedSecretBytes, StandardCharsets.UTF_8);
-                    Log.w("[OrdersAdapter] HandleMessage", "Decrypt: " + decryptedSecretStr);
-                    containerQrCode.setImageBitmap(generateQrCode(decryptedSecretStr));
+                    String finalString = CryptoHandler.getInstance().decryptPrivate(order.getSecret());
+                    Log.w("[OrdersHandler] HandleMessage", "Final: " + finalString);
+                    containerQrCode.setImageBitmap(generateQrCode(finalString));
                     dialog.show();
                     break;
 
