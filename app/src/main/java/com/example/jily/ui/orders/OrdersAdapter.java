@@ -170,34 +170,41 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
     }
 
     private String refreshOrder(Order order) {
-        int i;
-        for (i = 0; i < orders.size(); i++) {
-            if (orders.get(i).getOrderId().equals(order.getOrderId())) {
+        int position;
+        for (position = 0; position < orders.size(); position++) {
+            if (orders.get(position).getOrderId().equals(order.getOrderId())) {
                 // Update the order status
                 String status = order.getStatus();
                 switch (status) {
                     case MessageConstants.STATUS_CONFIRM:
-                        orders.get(i).setStatus(MessageConstants.STATUS_PROGRESS);
+                        orders.get(position).setStatus(MessageConstants.STATUS_PROGRESS);
                         break;
 
                     case MessageConstants.STATUS_PROGRESS:
-                        orders.get(i).setStatus(MessageConstants.STATUS_READY);
+                        orders.get(position).setStatus(MessageConstants.STATUS_READY);
                         break;
 
                     case MessageConstants.STATUS_READY:
-                        orders.get(i).setStatus(MessageConstants.STATUS_COMPLETED);
+                        orders.get(position).setStatus(MessageConstants.STATUS_COMPLETED);
                         break;
                 }
 
                 // Notify the current view that the order has been updated
                 // TODO: May need to send explicit notification too once integrated with Firebase
-                notifyItemRemoved(i);
-                notifyItemInserted(i);
+                notifyItemRemoved(position);
+                notifyItemInserted(position);
                 break;
             }
         }
 
-        return orders.get(i).getStatus();
+        String retStatus;
+        if (position == orders.size()) {
+            retStatus = MessageConstants.ERROR_ORDER_NOT_FOUND;
+        } else {
+            retStatus = orders.get(position).getStatus();
+        }
+
+        return retStatus;
     }
 
     public void completeOrder(String secret) {

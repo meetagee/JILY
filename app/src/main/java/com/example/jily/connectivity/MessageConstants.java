@@ -29,5 +29,8 @@ public interface MessageConstants {
     String STATUS_PROGRESS = "In Progress";
     String STATUS_READY = "Ready For Pickup";
     String STATUS_COMPLETED = "Completed";
+
+    String ERROR_ORDER_NOT_FOUND = "Not Found";
+    String ERROR_QR_CODE_NEEDS_UPDATE = "QR Code Needs Update";
 }
 

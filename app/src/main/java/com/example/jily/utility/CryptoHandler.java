@@ -2,6 +2,7 @@ package com.example.jily.utility;
 
 import android.util.Log;
 
+import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 
 import java.nio.charset.StandardCharsets;
@@ -46,7 +47,7 @@ public class CryptoHandler {
             } catch (Exception e) {
                 e.printStackTrace();
                 // HACK: Used as an indicator for letting the customer know to regenerate QR code
-                return null;
+                return MessageConstants.ERROR_QR_CODE_NEEDS_UPDATE;
             }
             String decryptedSecretStr = new String(decryptedSecretBytes, StandardCharsets.UTF_8);
             finalStringBuilder.append(decryptedSecretStr);

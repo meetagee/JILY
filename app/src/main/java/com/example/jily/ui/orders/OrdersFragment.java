@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.databinding.FragmentOrdersBinding;
 import com.example.jily.utility.CryptoHandler;
 import com.google.zxing.client.android.Intents;
@@ -51,7 +52,7 @@ public class OrdersFragment extends Fragment {
                                 Collections.singletonList(encryptedSecret));
 
                         // If secret successfully decrypted, verify it with the backend
-                        if (secret != null) {
+                        if (!secret.equals(MessageConstants.ERROR_QR_CODE_NEEDS_UPDATE)) {
                             ordersAdapter.completeOrder(secret);
                         } else {
                             Toast.makeText(getActivity(),
