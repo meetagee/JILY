@@ -3,12 +3,11 @@ package com.example.jily.utility;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 
-import com.example.jily.model.User;
-
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 
 public class KeysManager {
+    public static final int KEY_SIZE = 2048;
     private static final String KEY_STORE_NAME = "AndroidKeyStore";
     private static volatile KeysManager mInstance;
 
@@ -38,10 +37,11 @@ public class KeysManager {
                     KeyProperties.KEY_ALGORITHM_RSA, KEY_STORE_NAME);
             keyPairGen.initialize(new KeyGenParameterSpec.Builder(
                     username,
-                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY
-                            | KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                    .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
-                    .setKeySize(User.KEY_SIZE)
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    .setDigests(KeyProperties.DIGEST_SHA256)
+                    .setKeySize(KEY_SIZE)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_ECB)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_restaurants">
+    app:startDestination="@+id/nav_merchants">
 
     <fragment
-        android:id="@+id/nav_restaurants"
-        android:name="com.example.jily.ui.restaurants.RestaurantsFragment"
-        android:label="@string/menu_restaurants"
-        tools:layout="@layout/fragment_restaurants" />
+        android:id="@+id/nav_merchants"
+        android:name="com.example.jily.ui.merchants.MerchantsFragment"
+        android:label="@string/menu_merchants"
+        tools:layout="@layout/fragment_merchants" />
 
     <fragment
         android:id="@+id/nav_orders"

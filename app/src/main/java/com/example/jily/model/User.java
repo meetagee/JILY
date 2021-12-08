@@ -5,11 +5,18 @@ import androidx.annotation.Nullable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class User {
-
-    public static final int KEY_SIZE = 2048;
     public static final String DUMMY_FIREBASE_TOKEN = "DUMMY_FIREBASE_TOKEN";
     public static final String DUMMY_ACCESS_TOKEN = "DUMMY_ACCESS_TOKEN";
     public static final String DUMMY_USER_ID = "DUMMY_USER_ID";
@@ -25,7 +32,8 @@ public class User {
 
     @SerializedName("public_key")
     @Expose
-    private String publicKey;
+    private String publicKeyStr;
+    private PublicKey publicKey;
     private PrivateKey privateKey;
 
     @SerializedName("type")
@@ -46,24 +54,40 @@ public class User {
 
     public User(String username,
                 String password,
-                String publicKey,
+                PublicKey publicKey,
+                PrivateKey privateKey,
                 String userType,
                 String firebaseToken,
                 String accessToken,
-                @Nullable String userId) {
+                @Nullable String userId) throws IOException {
         this.username = username;
         this.password = password;
         this.publicKey = publicKey;
+        byte[] pubBytes = publicKey.getEncoded();
+
+        SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(pubBytes);
+        ASN1Primitive primitive = spkInfo.parsePublicKey();
+        byte[] publicKeyPKCS1 = primitive.getEncoded();
+
+        PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        PemWriter pemWriter = new PemWriter(new OutputStreamWriter(byteStream));
+        pemWriter.writeObject(pemObject);
+        pemWriter.close();
+        this.publicKeyStr = byteStream.toString();
+
+        this.privateKey = privateKey;
         this.userType = userType;
         this.firebaseToken = firebaseToken;
         this.accessToken = accessToken;
         this.userId = userId;
     }
 
-    public User(User that) {
+    public User(User that) throws IOException {
         this(that.getUsername(),
                 that.getPassword(),
                 that.getPublicKey(),
+                that.getPrivateKey(),
                 that.getUserType(),
                 that.getFirebaseToken(),
                 that.getAccessToken(),
@@ -86,11 +110,11 @@ public class User {
         this.username = username;
     }
 
-    public String getPublicKey() {
+    public PublicKey getPublicKey() {
         return publicKey;
     }
 
-    public void setPublicKey(String publicKey) {
+    public void setPublicKey(PublicKey publicKey) {
         this.publicKey = publicKey;
     }
 
@@ -140,6 +164,14 @@ public class User {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getPublicKeyStr() {
+        return publicKeyStr;
+    }
+
+    public void setPublicKeyStr(String publicKeyStr) {
+        this.publicKeyStr = publicKeyStr;
     }
 
     public enum UserType {

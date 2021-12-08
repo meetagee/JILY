@@ -8,7 +8,9 @@ import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
 import com.example.jily.model.Order;
-import com.example.jily.model.Restaurant;
+import com.example.jily.model.Merchants;
+import com.example.jily.model.Orders;
+import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
 import com.example.jily.utility.DebugConstants;
 import com.google.gson.Gson;
@@ -34,6 +36,7 @@ public class ServerInterface {
     private final int FORBIDDEN = 403;
     private final int NOT_FOUND = 404;
     private final int UNPROCESSABLE = 422;
+    private final int SERVER_ERROR = 500;
 
     private final ServerEndpoint server;
     private Handler mHandler;
@@ -63,8 +66,7 @@ public class ServerInterface {
         String baseUrl = "http://";
         if (BuildConfig.BUILD_TYPE.equals("debug")) {
             baseUrl += DebugConstants.SERVER_IP;
-        }
-        else {
+        } else {
             baseUrl += SERVER_IP;
         }
         baseUrl += (":" + SERVER_PORT + "/");
@@ -81,10 +83,11 @@ public class ServerInterface {
     //----------------------------------------------------------------------------------------------
     private void stdResponse(Response<ResponseBody> response,
                              int responseType, int request, int reason) {
-        String error = null;
+        Gson gson = new Gson();
+        StdResponse error = null;
         try {
-            assert response.body() != null;
-            error = response.body().string();
+            assert response.errorBody() != null;
+            error = gson.fromJson(response.errorBody().string(), StdResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -290,7 +293,7 @@ public class ServerInterface {
     }
 
     //----------------------------------------------------------------------------------------------
-    // RESTAURANT HANDLERS
+    // MERCHANT HANDLERS
     //----------------------------------------------------------------------------------------------
     public void getMerchants(User user) {
         server.getMerchants(user.getAccessToken()).enqueue(new Callback<ResponseBody>() {
@@ -300,12 +303,12 @@ public class ServerInterface {
                     try {
                         assert response.body() != null;
                         Gson gson = new Gson();
-                        Restaurant merchants = gson.fromJson(response.body().string(), Restaurant.class);
+                        Merchants merchants = gson.fromJson(response.body().string(), Merchants.class);
                         if (merchants.getMerchants().size() > 0) {
-                            // Send merchant's details; a default message is already set up when
+                            // Send merchants' details; a default message is already set up when
                             // there are no merchants as no explicit error is provided by the server
                             Message readMsg = mHandler.obtainMessage(
-                                    MessageConstants.MESSAGE_RESTAURANT_RESPONSE,
+                                    MessageConstants.MESSAGE_MERCHANT_RESPONSE,
                                     MessageConstants.REQUEST_GET,
                                     MessageConstants.OPERATION_SUCCESS,
                                     merchants);
@@ -317,7 +320,7 @@ public class ServerInterface {
                 } else {
                     try {
                         assert response.errorBody() != null;
-                        Log.e("[ServerInterface] GetMerchants:", "Response:" + response.errorBody().string());
+                        Log.e("[ServerInterface] GetMerchants", "Response:" + response.errorBody().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -326,7 +329,7 @@ public class ServerInterface {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("[ServerInterface] GetMerchants:", "Failure:" + t.getMessage());
+                Log.e("[ServerInterface] GetMerchants", "Failure:" + t.getMessage());
             }
         });
     }
@@ -363,7 +366,7 @@ public class ServerInterface {
                 } else {
                     try {
                         assert response.errorBody() != null;
-                        Log.e("[ServerInterface] CreateOrder:", "Response:" + response.errorBody().string());
+                        Log.e("[ServerInterface] CreateOrder", "Response:" + response.errorBody().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -372,7 +375,101 @@ public class ServerInterface {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("[ServerInterface] CreateOrder:", "Failure:" + t.getMessage());
+                Log.e("[ServerInterface] CreateOrder", "Failure:" + t.getMessage());
+            }
+        });
+    }
+
+    public void getOrders(User user) {
+        server.getOrders(user.getAccessToken(), user.getUserId()).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        Gson gson = new Gson();
+                        Orders orders = gson.fromJson(response.body().string(), Orders.class);
+                        if (orders.getOrders().size() > 0) {
+                            // Send orders' details; a default message is already set up when
+                            // there are no orders as no explicit error is provided by the server
+                            Message readMsg = mHandler.obtainMessage(
+                                    MessageConstants.MESSAGE_ORDER_RESPONSE,
+                                    MessageConstants.REQUEST_GET,
+                                    MessageConstants.OPERATION_SUCCESS,
+                                    orders);
+                            readMsg.sendToTarget();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] GetOrders", "Response:" + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] GetOrders", "Failure:" + t.getMessage());
+            }
+        });
+    }
+
+    public void getOrderSecret(User user, Order order) {
+        server.getOrderSecret(user.getAccessToken(), order.getOrderId()).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        assert response.body() != null;
+                        Gson gson = new Gson();
+                        Order order = gson.fromJson(response.body().string(), Order.class);
+                        Message readMsg = mHandler.obtainMessage(
+                                MessageConstants.MESSAGE_ORDER_RESPONSE,
+                                MessageConstants.REQUEST_GET,
+                                MessageConstants.OPERATION_SUCCESS,
+                                order);
+                        readMsg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (response.code() == BAD_REQUEST) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_BAD_REQUEST);
+                } else if (response.code() == UNAUTHORIZED) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_UNAUTHORIZED);
+                } else if (response.code() == NOT_FOUND) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_NOT_FOUND);
+                } else if (response.code() == SERVER_ERROR) {
+                    stdResponse(response,
+                            MessageConstants.MESSAGE_ORDER_RESPONSE,
+                            MessageConstants.REQUEST_GET,
+                            MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] GetQrCode", "Response:" + response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] GetQrCode", "Failure:" + t.getMessage());
             }
         });
     }

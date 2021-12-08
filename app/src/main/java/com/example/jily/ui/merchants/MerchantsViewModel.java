@@ -1,4 +1,4 @@
-package com.example.jily.ui.restaurants;
+package com.example.jily.ui.merchants;
 
 import android.os.Handler;
 import android.os.Message;
@@ -10,12 +10,12 @@ import androidx.lifecycle.ViewModel;
 import com.example.jily.connectivity.MessageConstants;
 import com.example.jily.connectivity.RuntimeManager;
 import com.example.jily.connectivity.ServerInterface;
-import com.example.jily.model.Restaurant;
+import com.example.jily.model.Merchants;
 import com.example.jily.model.User;
 
 import java.util.ArrayList;
 
-public class RestaurantsViewModel extends ViewModel {
+public class MerchantsViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
     private MutableLiveData<ArrayList<User>> mList;
@@ -23,10 +23,10 @@ public class RestaurantsViewModel extends ViewModel {
     private ServerInterface mServerIf;
     private Handler mHandler;
 
-    public RestaurantsViewModel() {
+    public MerchantsViewModel() {
         mText = new MutableLiveData<>();
         mServerIf = ServerInterface.getInstance();
-        mHandler = new RestaurantsHandler();
+        mHandler = new MerchantsHandler();
     }
 
     public LiveData<String> getText() {
@@ -43,15 +43,13 @@ public class RestaurantsViewModel extends ViewModel {
         return mList;
     }
 
-    public Handler getHandler() { return mHandler; }
-
-    private class RestaurantsHandler extends Handler {
+    private class MerchantsHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             if (msg.arg2 == MessageConstants.OPERATION_SUCCESS) {
-                Restaurant restaurant = (Restaurant) msg.obj;
-                ArrayList<User> merchants = new ArrayList<>(restaurant.getMerchants());
-                mList.postValue(merchants);
+                Merchants merchants = (Merchants) msg.obj;
+                ArrayList<User> listOfMerchants = new ArrayList<>(merchants.getMerchants());
+                mList.postValue(listOfMerchants);
                 mText.postValue("");
             }
         }

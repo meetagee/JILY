@@ -1,4 +1,4 @@
-package com.example.jily.ui.restaurants;
+package com.example.jily.ui.merchants;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,12 +13,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.jily.databinding.FragmentRestaurantsBinding;
+import com.example.jily.databinding.FragmentMerchantsBinding;
 
-public class RestaurantsFragment extends Fragment {
+public class MerchantsFragment extends Fragment {
 
-    private RestaurantsViewModel restaurantsViewModel;
-    private FragmentRestaurantsBinding binding;
+    private MerchantsViewModel merchantsViewModel;
+    private FragmentMerchantsBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,21 +35,21 @@ public class RestaurantsFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        restaurantsViewModel =
-                new ViewModelProvider(this).get(RestaurantsViewModel.class);
+        merchantsViewModel =
+                new ViewModelProvider(this).get(MerchantsViewModel.class);
 
-        binding = FragmentRestaurantsBinding.inflate(inflater, container, false);
+        binding = FragmentMerchantsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textRestaurants;
-        restaurantsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textMerchants;
+        merchantsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
-        final RecyclerView recyclerView = binding.listRestaurants;
+        final RecyclerView recyclerView = binding.listMerchants;
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        restaurantsViewModel.getList().observe(getViewLifecycleOwner(), inList ->
-                recyclerView.setAdapter(new RestaurantsAdapter(inList, getContext())));
+        merchantsViewModel.getList().observe(getViewLifecycleOwner(), inList ->
+                recyclerView.setAdapter(new MerchantsAdapter(inList, getContext())));
 
         return root;
     }
