@@ -24,13 +24,10 @@ public class MerchantsViewModel extends ViewModel {
     private ServerInterface mServerIf;
     private Handler mHandler;
 
-    private boolean mFirebaseTokenUpdated;
-
     public MerchantsViewModel() {
         mText = new MutableLiveData<>();
         mServerIf = ServerInterface.getInstance();
         mHandler = new MerchantsHandler();
-        mFirebaseTokenUpdated = false;
     }
 
     public LiveData<String> getText() {
@@ -55,9 +52,10 @@ public class MerchantsViewModel extends ViewModel {
                 ArrayList<User> listOfMerchants = new ArrayList<>(merchants.getMerchants());
                 mList.postValue(listOfMerchants);
                 mText.postValue("");
-                if (!mFirebaseTokenUpdated) {
+                User currentUser = RuntimeManager.getInstance().getCurrentUser();
+                if (!currentUser.isFirebaseTokenInitialized()) {
                     JilyFirebaseMessagingService.getInstance().updateFirebaseToken();
-                    mFirebaseTokenUpdated = true;
+                    currentUser.setFirebaseTokenInitialized(true);
                 }
             }
         }
