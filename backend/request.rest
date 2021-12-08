@@ -1,0 +1,71 @@
+POST http://localhost:5000/user/signup
+Content-Type: application/json
+
+{
+    "username": "yash",
+    "password": "123456",
+    "public_key": "",
+    "type": "Customer",
+    "firebase_token": "SampleToken"
+}
+###
+
+POST http://localhost:5000/user/login
+Content-Type: application/json
+
+{
+    "username": "yash",
+    "password": "123456",
+    "public_key": "7777"
+}
+###
+
+GET http://localhost:5000/user/logout/619f417f99d4b918d6eec675
+
+####
+POST http://localhost:5000/order/new-order/
+Content-Type: application/json
+
+{   
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY", 
+    "restaurant_id": "123123",
+    "items": [
+        "veggie bowl",
+        "veggie drink",
+        "veggie salad"
+    ]
+}
+#####
+
+POST http://localhost:5000/order/new-order/
+Content-Type: application/json
+
+{   
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY", 
+    "restaurant_id": "123123",
+    "items": [
+        "veggie bowl",
+        "veggie drink",
+        "veggie salad"
+    ]
+}
+#####
+
+PUT http://localhost:5000/order/confirm/61a03e969c407a4f245ddc44/
+Content-Type: application/json
+
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTAzNWJkYTk0MzI2NTVlNjYxZGU3ZSIsImlhdCI6MTYzNzg5MTY1NSwiZXhwIjoxNjM4MTUwODU1fQ.SKGSaATDUS_LdiReaLk_Sfc8mmvXzJYlvNbSBo1fYlY"
+     
+}
+
+#####
+
+GET http://localhost:5000/user/merchants
+access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTcxOWQ0MzkxMTQ3ZmQ3ZmY5YmQ0ZSIsImlhdCI6MTYzODc2OTI2NSwiZXhwIjoxNjM5MDI4NDY1fQ.9RS_HIErPCN5WwC72hkQkxQro0EZO6Ky_c7Lb8reKKU
+
+###
+
+GET http://localhost:5000/user/user/61a719d4391147fd7ff9bd4f
+access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTcxOWQ0MzkxMTQ3ZmQ3ZmY5YmQ0ZSIsImlhdCI6MTYzODc2OTI2NSwiZXhwIjoxNjM5MDI4NDY1fQ.9RS_HIErPCN5WwC72hkQkxQro0EZO6Ky_c7Lb8reKKU
+
