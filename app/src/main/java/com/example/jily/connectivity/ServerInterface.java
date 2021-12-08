@@ -7,8 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
-import com.example.jily.model.Order;
 import com.example.jily.model.Merchants;
+import com.example.jily.model.Order;
 import com.example.jily.model.Orders;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
@@ -448,7 +448,7 @@ public class ServerInterface {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("[ServerInterface] GetOrders", "Failure:" + t.getMessage());
+                Log.e("[ServerInterface] UpdateFirebaseToken", "Failure:" + t.getMessage());
             }
         });
     }
