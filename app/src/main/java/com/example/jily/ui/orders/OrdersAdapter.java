@@ -183,6 +183,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
                         dialog.show();
                     } else {
                         refreshOrder(order);
+                        String status = order.getStatus();
+                        if (status.equals(MessageConstants.STATUS_COMPLETED)) {
+                            Toast.makeText(mContext.getApplicationContext(),
+                                    "Order is " + status, Toast.LENGTH_SHORT).show();
+                        }
                     }
                     break;
 
