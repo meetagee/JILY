@@ -244,7 +244,7 @@ const get_order_by_id = async (req, res) => {
         console.log(`Order ${req.params.order_id} not found!`);
         res.status(404).json({order: "Order not found"});
     } else {
-        res.status(200).json({order});
+        res.status(200).json(order);
     }
 
 }
