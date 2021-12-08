@@ -29,7 +29,7 @@
         android:textColor="@color/primary_dark"
         android:textSize="@dimen/text_small"
         app:layout_constraintBottom_toTopOf="@id/text_order_status"
-        app:layout_constraintEnd_toStartOf="@id/button_more"
+        app:layout_constraintEnd_toStartOf="@id/button_qr_code"
         app:layout_constraintStart_toEndOf="@id/icon_order"
         app:layout_constraintTop_toTopOf="@id/icon_order" />
 
@@ -44,16 +44,16 @@
         android:text="@string/text_status"
         android:textColor="@color/primary"
         android:textSize="@dimen/text_xsmall"
-        app:layout_constraintBottom_toBottomOf="@id/button_more"
-        app:layout_constraintEnd_toStartOf="@id/button_more"
+        app:layout_constraintBottom_toBottomOf="@id/button_qr_code"
+        app:layout_constraintEnd_toStartOf="@id/button_qr_code"
         app:layout_constraintStart_toEndOf="@id/icon_order"
         app:layout_constraintTop_toBottomOf="@id/text_order_title" />
 
     <ImageButton
-        android:id="@+id/button_more"
+        android:id="@+id/button_qr_code"
         android:layout_width="@dimen/width_button_more"
         android:layout_height="@dimen/width_button_more"
-        android:background="@drawable/ic_more"
+        android:background="@drawable/ic_qr_code"
         android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

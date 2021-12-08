@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -86,7 +87,9 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         final String status = orders.get(position).getStatus();
 
         holder.textOrderTitle.setText(name);
-        holder.textOrderTitle.setOnClickListener(v -> {
+        holder.textOrderStatus.setText(status);
+
+        holder.buttonQrCode.setOnClickListener(v -> {
             // Inflate a dialog that will hold the QR code of the encrypted message
             initDialog(v);
 
@@ -97,8 +100,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             mServerIf.setHandler(mHandler);
             mServerIf.getOrderSecret(currentUser, order);
         });
-
-        holder.textOrderStatus.setText(status);
     }
 
     @Override
@@ -140,6 +141,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
         public TextView textOrderTitle;
         public TextView textOrderStatus;
+        public ImageButton buttonQrCode;
         public View layout;
 
         // Provide a reference to the views for each order
@@ -148,6 +150,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
             layout = v;
             textOrderTitle = v.findViewById(R.id.text_order_title);
             textOrderStatus = v.findViewById(R.id.text_order_status);
+            buttonQrCode = v.findViewById(R.id.button_qr_code);
         }
     }
 
