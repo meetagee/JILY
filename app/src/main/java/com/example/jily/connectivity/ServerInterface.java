@@ -7,8 +7,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.jily.BuildConfig;
-import com.example.jily.model.Order;
 import com.example.jily.model.Merchants;
+import com.example.jily.model.Order;
 import com.example.jily.model.Orders;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
@@ -102,24 +102,24 @@ public class ServerInterface {
         server.login(user).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                Message readMsg;
+                int messageRetCode = -1;
                 Gson gson = new Gson();
                 if (response.isSuccessful()) {
+                    messageRetCode = MessageConstants.OPERATION_SUCCESS;
                     try {
                         assert response.body() != null;
                         User recvUser = gson.fromJson(response.body().string(), User.class);
                         User currentUser = RuntimeManager.getInstance().getCurrentUser();
-                        currentUser.setAccessToken(recvUser.getAccessToken());
-                        currentUser.setUserId(recvUser.getUserId());
-                        currentUser.setUserType(recvUser.getUserType());
+                        if (User.UserType.fromString(recvUser.getUserType()) != User.UserType.Customer) {
+                            messageRetCode = MessageConstants.OPERATION_FAILURE_INCOMPATIBLE_UI;
+                        } else {
+                            currentUser.setAccessToken(recvUser.getAccessToken());
+                            currentUser.setUserId(recvUser.getUserId());
+                            currentUser.setUserType(recvUser.getUserType());
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    // Tell user we successfully created their details
-                    readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_LOGIN_RESPONSE,
-                            MessageConstants.REQUEST_GET,
-                            MessageConstants.OPERATION_SUCCESS);
                 } else {
                     boolean bDoesUserExist = true;
                     boolean bPasswordIncorrect = false;
@@ -137,7 +137,6 @@ public class ServerInterface {
                     }
 
                     // Tell user we encountered a failure
-                    int messageRetCode = -1;
                     if (!bDoesUserExist) {
                         messageRetCode = MessageConstants.OPERATION_FAILURE_NOT_FOUND;
                     } else if (bPasswordIncorrect) {
@@ -145,11 +144,11 @@ public class ServerInterface {
                     } else {
                         messageRetCode = MessageConstants.OPERATION_FAILURE_UNPROCESSABLE;
                     }
-                    readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_LOGIN_RESPONSE,
-                            MessageConstants.REQUEST_CREATE,
-                            messageRetCode);
                 }
+                Message readMsg = mHandler.obtainMessage(
+                        MessageConstants.MESSAGE_LOGIN_RESPONSE,
+                        MessageConstants.REQUEST_GET,
+                        messageRetCode);
                 readMsg.sendToTarget();
 
             }
@@ -206,23 +205,23 @@ public class ServerInterface {
         server.createUser(user).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                Message readMsg;
+                int messageRetCode = -1;
                 Gson gson = new Gson();
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
+                        messageRetCode = MessageConstants.OPERATION_SUCCESS;
                         User recvUser = gson.fromJson(response.body().string(), User.class);
                         User currentUser = RuntimeManager.getInstance().getCurrentUser();
-                        currentUser.setAccessToken(recvUser.getAccessToken());
-                        currentUser.setUserId(recvUser.getUserId());
+                        if (User.UserType.fromString(recvUser.getUserType()) != User.UserType.Customer) {
+                            messageRetCode = MessageConstants.OPERATION_FAILURE_INCOMPATIBLE_UI;
+                        } else {
+                            currentUser.setAccessToken(recvUser.getAccessToken());
+                            currentUser.setUserId(recvUser.getUserId());
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    // Tell user we successfully created their details
-                    readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_CREATE,
-                            MessageConstants.OPERATION_SUCCESS);
                 } else {
                     boolean bDoesUserExist = false;
                     try {
@@ -237,20 +236,25 @@ public class ServerInterface {
                     }
 
                     // Tell user we encountered a failure
-                    int messageRetCode = (bDoesUserExist) ?
+                    messageRetCode = (bDoesUserExist) ?
                             MessageConstants.OPERATION_FAILURE_UNAUTHORIZED :
                             MessageConstants.OPERATION_FAILURE_UNPROCESSABLE;
-                    readMsg = mHandler.obtainMessage(
-                            MessageConstants.MESSAGE_USER_RESPONSE,
-                            MessageConstants.REQUEST_CREATE,
-                            messageRetCode);
                 }
+                Message readMsg = mHandler.obtainMessage(
+                        MessageConstants.MESSAGE_USER_RESPONSE,
+                        MessageConstants.REQUEST_CREATE,
+                        messageRetCode);
                 readMsg.sendToTarget();
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] CreateUser", "Failure:" + t.getMessage());
+                Message readMsg = mHandler.obtainMessage(
+                        MessageConstants.MESSAGE_USER_RESPONSE,
+                        MessageConstants.REQUEST_CREATE,
+                        MessageConstants.OPERATION_FAILURE_SERVER_ERROR);
+                readMsg.sendToTarget();
             }
         });
     }
@@ -328,7 +332,7 @@ public class ServerInterface {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] GetMerchants", "Failure:" + t.getMessage());
             }
         });
@@ -341,7 +345,7 @@ public class ServerInterface {
     public void createOrder(User user, Order order) {
         server.createOrder(user.getAccessToken(), order).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
@@ -374,7 +378,7 @@ public class ServerInterface {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] CreateOrder", "Failure:" + t.getMessage());
             }
         });
@@ -383,7 +387,7 @@ public class ServerInterface {
     public void getOrders(User user) {
         server.getOrders(user.getAccessToken(), user.getUserId()).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
@@ -413,7 +417,7 @@ public class ServerInterface {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] GetOrders", "Failure:" + t.getMessage());
             }
         });
@@ -422,7 +426,7 @@ public class ServerInterface {
     public void getOrderSecret(User user, Order order) {
         server.getOrderSecret(user.getAccessToken(), order.getOrderId()).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
                         assert response.body() != null;
@@ -468,7 +472,7 @@ public class ServerInterface {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 Log.e("[ServerInterface] GetQrCode", "Failure:" + t.getMessage());
             }
         });

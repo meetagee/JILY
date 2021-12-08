@@ -189,5 +189,17 @@ public class User {
                     return null;
             }
         }
+
+        @Nullable
+        public static UserType fromString(String s) {
+            switch (s) {
+                case "Customer":
+                    return Customer;
+                case "Merchant":
+                    return Merchant;
+                default:
+                    return null;
+            }
+        }
     }
 }
