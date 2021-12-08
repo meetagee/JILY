@@ -2,6 +2,7 @@ package com.example.jily.ui.orders;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
@@ -10,8 +11,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.jily.R;
@@ -21,6 +26,7 @@ import com.example.jily.connectivity.ServerInterface;
 import com.example.jily.model.Order;
 import com.example.jily.model.StdResponse;
 import com.example.jily.model.User;
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +35,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
 
     private final List<Order> orders;
     private final Context mContext;
+    private ActivityResultLauncher<Intent> mActivityResultLauncher;
 
     private ServerInterface mServerIf;
     private Handler mHandler;
@@ -60,9 +67,11 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         notifyItemRangeChanged(position, getItemCount());
     }
 
-    public OrdersAdapter(ArrayList<Order> myDataset, Context context) {
+    public OrdersAdapter(ArrayList<Order> myDataset, Context context,
+                         ActivityResultLauncher<Intent> activityResultLauncher) {
         orders = myDataset;
         mContext = context;
+        mActivityResultLauncher = activityResultLauncher;
 
         mServerIf = ServerInterface.getInstance();
         mHandler = new OrdersHandler();
@@ -125,6 +134,26 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrdersView
         } else {
             mServerIf.confirmOrder(currentUser, orders.get(position));
         }
+    }
+
+    private void scanOrder() {
+        // Find the fragment associated with the Orders tab
+        FragmentManager manager = ((AppCompatActivity) mContext).getSupportFragmentManager();
+        Fragment host = manager.findFragmentById(R.id.nav_host_fragment_activity_main);
+        assert host != null;
+        OrdersFragment fragment =
+                (OrdersFragment) host.getChildFragmentManager().getFragments().get(0);
+
+        // Build an intent to launch a QR code scanner
+        IntentIntegrator integrator = IntentIntegrator.forSupportFragment(fragment);
+        integrator.setBarcodeImageEnabled(false);
+        integrator.setBeepEnabled(false);
+        integrator.setCameraId(0);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        integrator.setOrientationLocked(true);
+        integrator.setPrompt("Scan and complete order");
+
+        mActivityResultLauncher.launch(integrator.createScanIntent());
     }
 
     private String refreshOrder(Order order) {
