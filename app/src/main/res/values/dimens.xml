@@ -6,6 +6,7 @@
     <dimen name="height_button_auth">45dp</dimen>
     <dimen name="height_button_back">25dp</dimen>
     <dimen name="height_button_more">25dp</dimen>
+    <dimen name="height_nav_menu">56dp</dimen>
     <dimen name="height_separator">2dp</dimen>
     <dimen name="height_tab">50dp</dimen>
     <dimen name="height_spinner_item">25dp</dimen>
