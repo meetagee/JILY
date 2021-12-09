@@ -115,6 +115,12 @@ public class LoginActivity extends AppCompatActivity {
                             MessageConstants.PASSWORD_INCORRECT, Toast.LENGTH_SHORT).show();
                     break;
 
+                case MessageConstants.OPERATION_FAILURE_INCOMPATIBLE_UI:
+                    Toast.makeText(getApplicationContext(),
+                            "You're logging in as a Merchant. Please login using the " +
+                                    "Merchant interface", Toast.LENGTH_LONG).show();
+                    break;
+
                 default:
                     Toast.makeText(getApplicationContext(), "There's an issue logging you in. Please " +
                             "try again.", Toast.LENGTH_SHORT).show();
