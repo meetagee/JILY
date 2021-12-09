@@ -181,6 +181,15 @@ public class CreateAccountActivity extends AppCompatActivity {
                             MessageConstants.DUPLICATE_USER_ERR_STRING, Toast.LENGTH_SHORT).show();
                     break;
 
+                case MessageConstants.OPERATION_FAILURE_INCOMPATIBLE_UI:
+                    Intent welcomeIntent = new Intent(getApplicationContext(), WelcomeActivity.class);
+                    startActivity(welcomeIntent);
+                    finish();
+                    Toast.makeText(getApplicationContext(),
+                            "We've created your Customer account. Please login using the " +
+                                    "Customer interface", Toast.LENGTH_LONG).show();
+                    break;
+
                 default:
                     Toast.makeText(getApplicationContext(), "There's an issue signing up. Please " +
                             "try again.", Toast.LENGTH_SHORT).show();
