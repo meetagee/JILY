@@ -32,4 +32,7 @@ public interface MessageConstants {
 
     String ERROR_ORDER_NOT_FOUND = "Not Found";
     String ERROR_QR_CODE_NEEDS_UPDATE = "QR Code Needs Update";
+
+    String DEFAULT_NOTIFICATION_ID = "JILY Notification";
+    String FCM_MESSAGE = "Order updates!";
 }

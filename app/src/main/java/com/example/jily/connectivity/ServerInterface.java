@@ -484,4 +484,38 @@ public class ServerInterface {
             }
         });
     }
+
+    public void updateFirebaseToken(User user, String firebaseToken) {
+        user.setFirebaseToken(firebaseToken);
+        server.updateFirebaseToken(user.getAccessToken(), user).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                Message readMsg;
+                int messageRetCode = -1;
+                if (response.isSuccessful()) {
+                    // Tell user their details were updated
+                    messageRetCode = MessageConstants.OPERATION_SUCCESS;
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        Log.e("[ServerInterface] Update Firebase token", response.errorBody().string());
+                        messageRetCode = MessageConstants.OPERATION_FAILURE_UNPROCESSABLE;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                readMsg = mHandler.obtainMessage(
+                        MessageConstants.MESSAGE_LOGIN_RESPONSE,
+                        MessageConstants.REQUEST_CREATE,
+                        messageRetCode);
+                readMsg.sendToTarget();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("[ServerInterface] UpdateFirebaseToken", "Failure:" + t.getMessage());
+            }
+        });
+    }
 }

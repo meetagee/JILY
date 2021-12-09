@@ -52,6 +52,8 @@ public class User {
     @Expose
     private String userId;
 
+    private boolean bIsFirebaseTokenInit = false;
+
     public User(String username,
                 String password,
                 PublicKey publicKey,
@@ -172,6 +174,14 @@ public class User {
 
     public void setPublicKeyStr(String publicKeyStr) {
         this.publicKeyStr = publicKeyStr;
+    }
+
+    public boolean isFirebaseTokenInitialized() {
+        return bIsFirebaseTokenInit;
+    }
+
+    public void setFirebaseTokenInitialized(boolean initialized) {
+        bIsFirebaseTokenInit = initialized;
     }
 
     public enum UserType {
