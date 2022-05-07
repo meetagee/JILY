@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_merchants">
+
+    <fragment
+        android:id="@+id/nav_merchants"
+        android:name="com.example.jily.ui.merchants.MerchantsFragment"
+        android:label="@string/menu_merchants"
+        tools:layout="@layout/fragment_merchants" />
+
+    <fragment
+        android:id="@+id/nav_orders"
+        android:name="com.example.jily.ui.orders.OrdersFragment"
+        android:label="@string/menu_orders"
+        tools:layout="@layout/fragment_orders" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.jily.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>
